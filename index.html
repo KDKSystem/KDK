@@ -3,244 +3,323 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>KDWK - Absensi Teknisi</title>
+<title>KDWK · Absensi Teknisi</title>
 <style>
   :root {
-    --navy: #1a1a2e;
-    --navy-light: #252542;
-    --green: #2ecc71;
-    --green-dark: #27ae60;
-    --yellow: #f1c40f;
-    --red: #e74c3c;
-    --red-dark: #c0392b;
-    --gray: #6b7280;
-    --gray-light: #e5e7eb;
-    --bg: #f4f5f7;
-    --white: #ffffff;
-    --radius: 14px;
+    --ink: #0b1120;
+    --ink-soft: #16213d;
+    --surface: #ffffff;
+    --bg: #eef1f6;
+    --blue: #2563eb;
+    --blue-dark: #1d4ed8;
+    --blue-tint: #eaf1ff;
+    --green: #10b981;
+    --green-dark: #059669;
+    --green-tint: #e7f8f1;
+    --amber: #f59e0b;
+    --amber-tint: #fef6e7;
+    --red: #ef4444;
+    --red-dark: #dc2626;
+    --red-tint: #fdedec;
+    --line: #e3e7ee;
+    --muted: #6b7686;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --mono: 'SF Mono', 'Roboto Mono', 'Courier New', monospace;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Roboto, sans-serif;
     background: var(--bg);
-    color: var(--navy);
+    color: var(--ink);
     min-height: 100vh;
     -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
   }
 
   .app {
     max-width: 480px;
     margin: 0 auto;
     min-height: 100vh;
-    background: var(--white);
-    display: flex;
-    flex-direction: column;
+    background: var(--surface);
+    position: relative;
+    box-shadow: 0 0 60px rgba(11,17,32,0.08);
   }
 
-  /* ===== HEADER ===== */
   .topbar {
-    background: var(--navy);
-    color: var(--white);
-    padding: 18px 20px;
+    background: linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    color: #fff;
+    padding: 16px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: 80;
   }
-  .topbar .brand { font-size: 15px; font-weight: 800; letter-spacing: 0.3px; }
-  .topbar .brand small { display: block; font-size: 11px; font-weight: 400; opacity: 0.65; margin-top: 2px; }
-  .topbar .user-chip { font-size: 12px; background: rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 20px; }
-  .topbar .logout-btn { background: none; border: none; color: var(--white); opacity: 0.7; font-size: 13px; padding: 6px; }
-
-  .screen { flex: 1; padding: 20px; padding-bottom: 100px; display: none; }
-  .screen.active { display: block; }
-
-  /* ===== LOGIN ===== */
-  #screen-login { display: flex; flex-direction: column; justify-content: center; min-height: calc(100vh - 0px); }
-  .login-logo { text-align: center; margin-bottom: 36px; }
-  .login-logo .mark {
-    width: 72px; height: 72px; background: var(--navy); border-radius: 18px;
-    display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
-    font-size: 28px; font-weight: 900; color: var(--white);
+  .topbar .brand { display: flex; align-items: center; gap: 10px; }
+  .topbar .brand .mk {
+    width: 34px; height: 34px; border-radius: 9px; background: var(--blue);
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;
   }
-  .login-logo h1 { font-size: 18px; font-weight: 800; }
-  .login-logo p { font-size: 13px; color: var(--gray); margin-top: 4px; }
+  .topbar .brand .tx { font-size: 13.5px; font-weight: 700; line-height: 1.2; }
+  .topbar .brand .tx small { display: block; font-size: 10.5px; font-weight: 500; opacity: 0.55; margin-top: 1px; letter-spacing: 0.3px; }
+  .topbar .user-chip { font-size: 11.5px; font-weight: 600; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; }
+  .topbar .logout-btn { background: none; border: none; color: #fff; opacity: 0.55; font-size: 12px; font-weight: 600; padding: 6px; margin-left: 6px; }
 
-  .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--gray); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .page {
+    display: none;
+    min-height: calc(100vh - 0px);
+    padding: 22px 20px 110px;
+  }
+  .page.active { display: block; }
+  .page.enter-fwd { animation: slideInFwd 0.32s cubic-bezier(.2,.7,.3,1) both; }
+  .page.enter-back { animation: slideInBack 0.32s cubic-bezier(.2,.7,.3,1) both; }
+  @keyframes slideInFwd { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slideInBack { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
+
+  #page-login.page { padding: 0; display: flex; align-items: center; min-height: 100vh; }
+  #page-login.page.active { display: flex; }
+
+  .login-card { width: 100%; padding: 40px 28px; }
+  .login-mark { text-align: center; margin-bottom: 40px; }
+  .login-mark .mk-big {
+    width: 76px; height: 76px; border-radius: 20px; margin: 0 auto 18px;
+    background: linear-gradient(135deg, var(--ink) 0%, var(--blue-dark) 130%);
+    display: flex; align-items: center; justify-content: center; color: #fff;
+    font-size: 24px; font-weight: 800; letter-spacing: 0.5px;
+    box-shadow: 0 14px 30px -8px rgba(37,99,235,0.45);
+  }
+  .login-mark h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.2px; }
+  .login-mark p { font-size: 13px; color: var(--muted); margin-top: 5px; font-weight: 500; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.5px; }
   .field input, .field select, .field textarea {
-    width: 100%; padding: 15px 16px; border: 2px solid var(--gray-light); border-radius: var(--radius);
-    font-size: 16px; background: var(--white); color: var(--navy); font-family: inherit;
+    width: 100%; padding: 16px 16px; border: 1.5px solid var(--line); border-radius: var(--radius-md);
+    font-size: 16px; background: var(--bg); color: var(--ink); font-family: inherit; transition: border-color 0.15s, background 0.15s;
   }
-  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--navy); }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--blue); background: var(--surface); }
   .field textarea { resize: vertical; min-height: 80px; }
 
   .btn {
-    width: 100%; padding: 17px; border: none; border-radius: var(--radius);
-    font-size: 16px; font-weight: 800; cursor: pointer; transition: transform 0.1s, opacity 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 17px; border: none; border-radius: var(--radius-md);
+    font-size: 15px; font-weight: 700; cursor: pointer; transition: transform 0.12s, opacity 0.2s, box-shadow 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.1px;
   }
-  .btn:active { transform: scale(0.98); }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-primary { background: var(--navy); color: var(--white); }
-  .btn-success { background: var(--green); color: var(--white); }
-  .btn-danger { background: var(--red); color: var(--white); }
-  .btn-outline { background: var(--white); color: var(--navy); border: 2px solid var(--gray-light); }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 10px 24px -8px rgba(37,99,235,0.5); }
+  .btn-success { background: var(--green); color: #fff; box-shadow: 0 10px 24px -8px rgba(16,185,129,0.45); }
+  .btn-danger { background: var(--red); color: #fff; box-shadow: 0 10px 24px -8px rgba(239,68,68,0.45); }
+  .btn-outline { background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); box-shadow: none; }
+  .btn-ghost { background: transparent; color: var(--blue); box-shadow: none; }
 
-  .error-msg { background: #fdeded; color: var(--red-dark); padding: 12px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 14px; display: none; }
-  .error-msg.show { display: block; }
+  .error-msg { background: var(--red-tint); color: var(--red-dark); padding: 13px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; margin-bottom: 14px; display: none; }
+  .error-msg.show { display: block; animation: shake 0.4s; }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
 
-  /* ===== STATUS BAR (langkah aktif) ===== */
-  .step-progress { display: flex; gap: 6px; margin-bottom: 20px; }
-  .step-progress .dot { flex: 1; height: 4px; border-radius: 4px; background: var(--gray-light); }
+  .step-progress { display: flex; gap: 6px; margin-bottom: 22px; }
+  .step-progress .dot { flex: 1; height: 4px; border-radius: 4px; background: var(--line); transition: background 0.3s; }
   .step-progress .dot.done { background: var(--green); }
-  .step-progress .dot.current { background: var(--navy); }
+  .step-progress .dot.current { background: var(--blue); }
 
-  .section-title { font-size: 19px; font-weight: 800; margin-bottom: 4px; }
-  .section-sub { font-size: 13px; color: var(--gray); margin-bottom: 18px; }
+  .eyebrow { font-size: 11px; font-weight: 800; color: var(--blue); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .section-title { font-size: 21px; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 5px; }
+  .section-sub { font-size: 13.5px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
 
-  /* ===== SEARCH LOKASI ===== */
   .search-box { position: relative; margin-bottom: 14px; }
-  .search-box input { padding-left: 42px; }
-  .search-box::before { content: "🔍"; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; }
+  .search-box input { padding-left: 44px; }
+  .search-box::before { content: "⌕"; position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 18px; color: var(--muted); font-weight: 700; }
 
-  .lokasi-list { display: flex; flex-direction: column; gap: 8px; max-height: 50vh; overflow-y: auto; }
+  .lokasi-list { display: flex; flex-direction: column; gap: 8px; max-height: 52vh; overflow-y: auto; padding-bottom: 2px; }
   .lokasi-item {
-    padding: 14px 16px; border: 2px solid var(--gray-light); border-radius: 12px;
-    cursor: pointer; transition: border-color 0.15s, background 0.15s;
+    padding: 14px 16px; border: 1.5px solid var(--line); border-radius: var(--radius-sm);
+    cursor: pointer; transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    display: flex; align-items: center; gap: 12px;
   }
-  .lokasi-item:active { background: var(--bg); }
-  .lokasi-item.selected { border-color: var(--navy); background: #f0f0f5; }
-  .lokasi-item .nm { font-weight: 700; font-size: 14.5px; }
-  .lokasi-item .ad { font-size: 12px; color: var(--gray); margin-top: 2px; }
+  .lokasi-item:active { transform: scale(0.98); background: var(--bg); }
+  .lokasi-item .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--blue-tint); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+  .lokasi-item .nm { font-weight: 700; font-size: 14px; }
+  .lokasi-item .ad { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
 
   .add-lokasi-link {
-    text-align: center; padding: 14px; font-size: 13px; font-weight: 700; color: var(--navy);
-    border: 2px dashed var(--gray-light); border-radius: 12px; margin-top: 10px; cursor: pointer;
+    text-align: center; padding: 15px; font-size: 13px; font-weight: 700; color: var(--blue);
+    border: 1.5px dashed var(--line); border-radius: var(--radius-sm); margin-top: 10px; cursor: pointer;
+  }
+  .add-lokasi-link:active { background: var(--blue-tint); }
+
+  .camera-wrap {
+    background: var(--ink); border-radius: var(--radius-lg); overflow: hidden; position: relative; margin-bottom: 14px;
+    aspect-ratio: 4/5;
+  }
+  video { width: 100%; height: 100%; display: block; object-fit: cover; }
+  .camera-wrap img.captured { width: 100%; height: 100%; display: none; object-fit: cover; }
+  .camera-frame-corner { position: absolute; width: 28px; height: 28px; border: 3px solid rgba(255,255,255,0.5); pointer-events: none; }
+  .cf-tl { top: 16px; left: 16px; border-right: none; border-bottom: none; border-top-left-radius: 8px; }
+  .cf-tr { top: 16px; right: 16px; border-left: none; border-bottom: none; border-top-right-radius: 8px; }
+  .cf-bl { bottom: 16px; left: 16px; border-right: none; border-top: none; border-bottom-left-radius: 8px; }
+  .cf-br { bottom: 16px; right: 16px; border-left: none; border-top: none; border-bottom-right-radius: 8px; }
+
+  .photo-success-badge {
+    position: absolute; top: 14px; right: 14px; background: var(--green); color: #fff; width: 32px; height: 32px;
+    border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 16px; font-weight: 800;
+    box-shadow: 0 4px 12px rgba(16,185,129,0.5); animation: popIn 0.35s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+  .photo-zoom-hint {
+    position: absolute; bottom: 14px; left: 14px; background: rgba(11,17,32,0.65); color: #fff; font-size: 11px; font-weight: 700;
+    padding: 6px 11px; border-radius: 20px; display: none; backdrop-filter: blur(4px);
   }
 
-  /* ===== CAMERA ===== */
-  .camera-wrap { background: var(--navy); border-radius: var(--radius); overflow: hidden; position: relative; margin-bottom: 14px; }
-  video { width: 100%; display: block; max-height: 60vh; object-fit: cover; }
-  .camera-wrap img.captured { width: 100%; display: block; max-height: 60vh; object-fit: cover; }
-  .shutter-row { display: flex; justify-content: center; padding: 16px; background: var(--navy); }
-  .shutter-btn {
-    width: 64px; height: 64px; border-radius: 50%; background: var(--white); border: 4px solid rgba(255,255,255,0.3);
-  }
+  .shutter-row { display: flex; align-items: center; justify-content: center; padding: 18px; background: var(--ink); gap: 24px; }
+  .shutter-btn { width: 62px; height: 62px; border-radius: 50%; background: #fff; border: 4px solid rgba(255,255,255,0.25); transition: transform 0.12s; }
+  .shutter-btn:active { transform: scale(0.88); }
   .retake-row { display: flex; gap: 10px; margin-bottom: 14px; }
 
-  /* ===== GPS CARD ===== */
-  .gps-card { padding: 14px 16px; border-radius: 12px; margin-bottom: 14px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-  .gps-card.loading { background: #fff8e1; color: #8a6d1a; }
-  .gps-card.ok { background: #e8f8ee; color: var(--green-dark); }
-  .gps-card.warn { background: #fdeded; color: var(--red-dark); }
-  .gps-spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  .camera-placeholder {
+    width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 600; gap: 10px; cursor: pointer;
+  }
+  .camera-placeholder .ic { font-size: 30px; }
+
+  .preview-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 400; display: none;
+    align-items: center; justify-content: center; flex-direction: column;
+  }
+  .preview-overlay.show { display: flex; }
+  .preview-overlay img { max-width: 92%; max-height: 78vh; border-radius: 12px; object-fit: contain; }
+  .preview-overlay .close-preview { margin-top: 22px; padding: 12px 28px; background: rgba(255,255,255,0.12); color: #fff; border: none; border-radius: 30px; font-size: 13px; font-weight: 700; }
+
+  .gps-card { padding: 14px 16px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 10px; font-family: var(--mono); }
+  .gps-card.loading { background: var(--amber-tint); color: #8a6418; }
+  .gps-card.ok { background: var(--green-tint); color: var(--green-dark); }
+  .gps-card.warn { background: var(--red-tint); color: var(--red-dark); }
+  .gps-spinner { width: 15px; height: 15px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .info-card { background: var(--bg); border-radius: 12px; padding: 14px 16px; margin-bottom: 14px; font-size: 13px; }
-  .info-card .row { display: flex; justify-content: space-between; padding: 4px 0; }
-  .info-card .row span:first-child { color: var(--gray); }
-  .info-card .row span:last-child { font-weight: 700; }
-
-  /* ===== BOTTOM BAR ===== */
   .bottom-bar {
     position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto;
-    background: var(--white); padding: 14px 20px; padding-bottom: max(14px, env(safe-area-inset-bottom));
-    border-top: 1px solid var(--gray-light); display: flex; gap: 10px;
+    background: var(--surface); padding: 14px 20px; padding-bottom: max(14px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line); display: flex; gap: 10px; z-index: 70;
+    box-shadow: 0 -8px 24px -10px rgba(11,17,32,0.08);
   }
 
-  /* ===== TOAST ===== */
   .toast {
     position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-100px);
-    background: var(--navy); color: var(--white); padding: 12px 20px; border-radius: 10px;
-    font-size: 13px; font-weight: 700; z-index: 200; transition: transform 0.3s; max-width: 90%; text-align: center;
+    background: var(--ink); color: #fff; padding: 13px 22px; border-radius: 30px;
+    font-size: 13px; font-weight: 700; z-index: 500; transition: transform 0.35s cubic-bezier(.2,.8,.3,1); max-width: 88%; text-align: center;
+    box-shadow: 0 10px 30px -8px rgba(0,0,0,0.4);
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
   .loading-overlay {
-    position: fixed; inset: 0; background: rgba(26,26,46,0.85); z-index: 300;
-    display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; color: white;
+    position: fixed; inset: 0; background: rgba(11,17,32,0.88); z-index: 600;
+    display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; color: white;
   }
   .loading-overlay.show { display: flex; }
-  .loading-spinner { width: 38px; height: 38px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  .loading-spinner-lg { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.25); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
   .loading-overlay p { font-size: 13px; font-weight: 600; }
 
-  .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; }
-  .badge.green { background: #e8f8ee; color: var(--green-dark); }
-  .badge.red { background: #fdeded; color: var(--red-dark); }
+  .badge { display: inline-block; padding: 4px 11px; border-radius: 20px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.2px; }
+  .badge.green { background: var(--green-tint); color: var(--green-dark); }
+  .badge.amber { background: var(--amber-tint); color: #8a6418; }
 
-  /* Home / dashboard ringkas teknisi */
-  .home-card { background: var(--navy); border-radius: var(--radius); padding: 20px; color: white; margin-bottom: 18px; }
-  .home-card h2 { font-size: 22px; margin-bottom: 4px; }
-  .home-card p { font-size: 13px; opacity: 0.7; }
-  .status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; margin-top: 12px; background: rgba(255,255,255,0.12); padding: 6px 12px; border-radius: 20px; }
-  .dot-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); }
+  .home-hero {
+    background: linear-gradient(135deg, var(--ink) 0%, var(--ink-soft) 100%);
+    border-radius: var(--radius-lg); padding: 24px 22px; color: #fff; margin-bottom: 20px; position: relative; overflow: hidden;
+  }
+  .home-hero::before {
+    content: ""; position: absolute; top: -40px; right: -40px; width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(37,99,235,0.35), transparent 70%);
+  }
+  .home-hero .greet { font-size: 12.5px; opacity: 0.6; font-weight: 600; }
+  .home-hero h2 { font-size: 23px; font-weight: 800; margin-top: 3px; letter-spacing: -0.3px; }
+  .status-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; margin-top: 14px; background: rgba(255,255,255,0.1); padding: 7px 13px; border-radius: 20px; }
+  .dot-pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); animation: pulse 1.6s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
 
-  .riwayat-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--gray-light); font-size: 13px; }
+  .action-stack { display: flex; flex-direction: column; gap: 11px; margin-bottom: 24px; }
+
+  .riwayat-section .label { font-size: 11.5px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+  .riwayat-card { background: var(--bg); border-radius: var(--radius-md); padding: 4px 16px; }
+  .riwayat-item { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
   .riwayat-item:last-child { border-bottom: none; }
   .riwayat-item .nm { font-weight: 700; }
-  .riwayat-item .tm { color: var(--gray); font-size: 12px; }
+  .riwayat-item .tm { color: var(--muted); font-size: 11.5px; margin-top: 2px; font-family: var(--mono); }
+  .empty-state { font-size: 13px; color: var(--muted); padding: 22px 0; text-align: center; }
+
+  .done-wrap { text-align: center; padding-top: 70px; }
+  .done-icon {
+    width: 84px; height: 84px; border-radius: 50%; background: var(--green-tint); display: flex; align-items: center;
+    justify-content: center; margin: 0 auto 22px; font-size: 38px; animation: popIn 0.4s cubic-bezier(.34,1.56,.64,1);
+  }
 </style>
 </head>
 <body>
-
 <div class="app">
-
-  <!-- ===================== TOPBAR ===================== -->
   <div class="topbar" id="topbar" style="display:none;">
-    <div class="brand">KHARISMA DWI KARYA<small>Absensi Teknisi</small></div>
-    <div style="display:flex; align-items:center; gap:8px;">
+    <div class="brand">
+      <div class="mk">KDK</div>
+      <div class="tx">KHARISMA DWI KARYA<small>Absensi Teknisi</small></div>
+    </div>
+    <div style="display:flex; align-items:center;">
       <div class="user-chip" id="userChip"></div>
       <button class="logout-btn" onclick="logout()">Keluar</button>
     </div>
   </div>
 
-  <!-- ===================== SCREEN: LOGIN ===================== -->
-  <div class="screen active" id="screen-login">
-    <div class="login-logo">
-      <div class="mark">KDK</div>
-      <h1>Kharisma Dwi Karya</h1>
-      <p>Sistem Absensi Teknisi Servis</p>
+  <!-- ============ LOGIN ============ -->
+  <div class="page active" id="page-login">
+    <div class="login-card">
+      <div class="login-mark">
+        <div class="mk-big">KDK</div>
+        <h1>Kharisma Dwi Karya</h1>
+        <p>Sistem Absensi Teknisi Servis</p>
+      </div>
+      <div class="error-msg" id="loginError"></div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="loginUsername" placeholder="cth. rifki" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••">
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()" id="loginBtn">Masuk</button>
     </div>
-    <div class="error-msg" id="loginError"></div>
-    <div class="field">
-      <label>Username</label>
-      <input type="text" id="loginUsername" placeholder="cth. rifki" autocomplete="off">
-    </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="••••••">
-    </div>
-    <button class="btn btn-primary" onclick="doLogin()" id="loginBtn">Masuk</button>
   </div>
 
-  <!-- ===================== SCREEN: HOME ===================== -->
-  <div class="screen" id="screen-home">
-    <div class="home-card">
-      <p id="homeGreeting">Selamat datang,</p>
+  <!-- ============ HOME ============ -->
+  <div class="page" id="page-home">
+    <div class="home-hero">
+      <div class="greet" id="homeGreeting">Selamat datang,</div>
       <h2 id="homeNama">-</h2>
       <div class="status-pill" id="homeStatusPill"><div class="dot-pulse"></div><span id="homeStatusText">Memuat status...</span></div>
     </div>
-    <button class="btn btn-success" style="margin-bottom:12px;" id="btnMulaiAbsen" onclick="mulaiAbsen()">📍 Mulai Absen Datang</button>
-    <button class="btn btn-outline" id="btnLanjutLaporan" onclick="lanjutKeLaporan()" style="display:none; margin-bottom:12px;">📝 Lanjut Isi Laporan</button>
-    <button class="btn btn-danger" id="btnAbsenPulang" onclick="mulaiAbsenPulang()" style="display:none;">🚪 Absen Pulang</button>
-
-    <div style="margin-top:24px;">
-      <div class="section-sub" style="margin-bottom:10px;">Aktivitas hari ini</div>
-      <div id="riwayatList" style="background:var(--bg); border-radius:12px; padding: 4px 16px;">
-        <p style="font-size:13px; color:var(--gray); padding:14px 0;">Belum ada aktivitas hari ini.</p>
+    <div class="action-stack">
+      <button class="btn btn-success" id="btnMulaiAbsen" onclick="goTo('page-lokasi','fwd')">📍 Mulai Absen Datang</button>
+      <button class="btn btn-outline" id="btnLanjutLaporan" onclick="lanjutKeLaporan()" style="display:none;">📝 Lanjut Isi Laporan</button>
+      <button class="btn btn-danger" id="btnAbsenPulang" onclick="mulaiAbsenPulang()" style="display:none;">🚪 Absen Pulang</button>
+    </div>
+    <div class="riwayat-section">
+      <div class="label">Aktivitas hari ini</div>
+      <div class="riwayat-card" id="riwayatList">
+        <p class="empty-state">Belum ada aktivitas hari ini.</p>
       </div>
     </div>
   </div>
 
-  <!-- ===================== SCREEN: PILIH LOKASI ===================== -->
-  <div class="screen" id="screen-lokasi">
+  <!-- ============ PILIH LOKASI ============ -->
+  <div class="page" id="page-lokasi">
     <div class="step-progress"><div class="dot current"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-    <div class="section-title">Pilih Lokasi Client</div>
+    <div class="eyebrow">Langkah 1 dari 4</div>
+    <div class="section-title">Pilih lokasi client</div>
     <div class="section-sub">Cari nama client tempat kamu akan servis hari ini</div>
     <div class="search-box">
       <input type="text" id="searchLokasi" placeholder="Cari nama client..." oninput="renderLokasiList()">
@@ -249,9 +328,11 @@
     <div class="add-lokasi-link" onclick="showTambahLokasi()">+ Lokasi tidak ada di daftar? Tambah baru</div>
   </div>
 
-  <!-- ===================== SCREEN: TAMBAH LOKASI BARU ===================== -->
-  <div class="screen" id="screen-tambah-lokasi">
-    <div class="section-title">Tambah Lokasi Baru</div>
+  <!-- ============ TAMBAH LOKASI ============ -->
+  <div class="page" id="page-tambah-lokasi">
+    <button class="btn btn-ghost" style="width:auto; padding:0; margin-bottom:16px; font-weight:700;" onclick="goTo('page-lokasi','back')">← Kembali</button>
+    <div class="eyebrow">Lokasi baru</div>
+    <div class="section-title">Tambah lokasi baru</div>
     <div class="section-sub">Pastikan kamu sudah berada di lokasi ini saat menambahkan</div>
     <div class="field">
       <label>Nama Client</label>
@@ -262,59 +343,72 @@
       <textarea id="newAlamat" placeholder="Alamat lengkap"></textarea>
     </div>
     <div class="gps-card loading" id="newLokasiGpsCard"><div class="gps-spinner"></div><span>Mengambil titik GPS kamu...</span></div>
-    <button class="btn btn-success" onclick="simpanLokasiBaru()" id="btnSimpanLokasiBaru" disabled>Simpan & Pilih Lokasi Ini</button>
+    <button class="btn btn-success" onclick="simpanLokasiBaru()" id="btnSimpanLokasiBaru" disabled>Simpan & pilih lokasi ini</button>
   </div>
 
-  <!-- ===================== SCREEN: CHECK IN CAMERA ===================== -->
-  <div class="screen" id="screen-checkin">
+  <!-- ============ CHECK IN ============ -->
+  <div class="page" id="page-checkin">
     <div class="step-progress"><div class="dot done"></div><div class="dot current"></div><div class="dot"></div><div class="dot"></div></div>
-    <div class="section-title">Absen Datang</div>
-    <div class="section-sub">Ambil foto selfie di lokasi <span id="checkinLokasiNama" style="font-weight:700;"></span></div>
+    <div class="eyebrow">Langkah 2 dari 4</div>
+    <div class="section-title">Absen datang</div>
+    <div class="section-sub">Selfie di lokasi <strong id="checkinLokasiNama" style="color:var(--ink);"></strong> untuk memverifikasi kehadiranmu</div>
 
     <div class="gps-card loading" id="checkinGpsCard"><div class="gps-spinner"></div><span>Mengambil lokasi GPS...</span></div>
 
     <div class="camera-wrap" id="checkinCameraWrap">
       <video id="checkinVideo" autoplay playsinline muted></video>
+      <img class="captured" id="checkinImg" onclick="zoomPhoto('checkin')">
+      <div class="camera-frame-corner cf-tl"></div><div class="camera-frame-corner cf-tr"></div>
+      <div class="camera-frame-corner cf-bl"></div><div class="camera-frame-corner cf-br"></div>
+      <div class="photo-success-badge" id="checkinBadge">✓</div>
+      <div class="photo-zoom-hint" id="checkinZoomHint">⤢ Ketuk untuk perbesar</div>
     </div>
     <div class="shutter-row" id="checkinShutterRow">
       <button class="shutter-btn" onclick="capturePhoto('checkin')"></button>
     </div>
     <div class="retake-row" id="checkinRetakeRow" style="display:none;">
-      <button class="btn btn-outline" onclick="retakePhoto('checkin')">Ambil Ulang</button>
+      <button class="btn btn-outline" onclick="retakePhoto('checkin')">↺ Ambil ulang</button>
     </div>
 
     <canvas id="checkinCanvas" style="display:none;"></canvas>
   </div>
 
   <div class="bottom-bar" id="bar-checkin" style="display:none;">
-    <button class="btn btn-success" onclick="submitCheckIn()" id="btnSubmitCheckin" disabled>Kirim Absen Datang</button>
+    <button class="btn btn-success" onclick="submitCheckIn()" id="btnSubmitCheckin" disabled>Kirim absen datang</button>
   </div>
 
-  <!-- ===================== SCREEN: LAPORAN SERVIS ===================== -->
-  <div class="screen" id="screen-laporan">
+  <!-- ============ LAPORAN ============ -->
+  <div class="page" id="page-laporan">
     <div class="step-progress"><div class="dot done"></div><div class="dot done"></div><div class="dot current"></div><div class="dot"></div></div>
-    <div class="section-title">Laporan Servis</div>
+    <div class="eyebrow">Langkah 3 dari 4</div>
+    <div class="section-title">Laporan servis</div>
     <div class="section-sub">Isi detail pekerjaan yang sudah dilakukan</div>
 
-    <label style="font-size:12px; font-weight:700; color:var(--gray); text-transform:uppercase; margin-bottom:6px; display:block;">Foto Hasil Pekerjaan</label>
-    <div class="camera-wrap" id="hasilCameraWrap" style="margin-bottom:10px;">
+    <label style="font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; display:block;">Foto hasil pekerjaan</label>
+    <div class="camera-wrap" id="hasilCameraWrap" style="aspect-ratio: 4/3; margin-bottom:10px;">
       <video id="hasilVideo" autoplay playsinline muted style="display:none;"></video>
-      <div id="hasilPlaceholder" style="padding:30px; text-align:center; color:rgba(255,255,255,0.6); font-size:13px;" onclick="openCamera('hasil')">📷 Ketuk untuk ambil foto</div>
+      <img class="captured" id="hasilImg" onclick="zoomPhoto('hasil')">
+      <div class="camera-placeholder" id="hasilPlaceholder" onclick="openCamera('hasil')"><div class="ic">📷</div><span>Ketuk untuk ambil foto</span></div>
+      <div class="photo-success-badge" id="hasilBadge">✓</div>
+      <div class="photo-zoom-hint" id="hasilZoomHint">⤢ Ketuk untuk perbesar</div>
     </div>
-    <div class="shutter-row" id="hasilShutterRow" style="display:none;"><button class="shutter-btn" onclick="capturePhoto('hasil')"></button></div>
-    <div class="retake-row" id="hasilRetakeRow" style="display:none;"><button class="btn btn-outline" onclick="retakePhoto('hasil')">Ambil Ulang</button></div>
+    <div class="shutter-row" id="hasilShutterRow" style="display:none; margin-top:-14px; margin-bottom:10px;"><button class="shutter-btn" onclick="capturePhoto('hasil')"></button></div>
+    <div class="retake-row" id="hasilRetakeRow" style="display:none;"><button class="btn btn-outline" onclick="retakePhoto('hasil')">↺ Ambil ulang</button></div>
     <canvas id="hasilCanvas" style="display:none;"></canvas>
 
-    <label style="font-size:12px; font-weight:700; color:var(--gray); text-transform:uppercase; margin: 16px 0 6px; display:block;">Foto Nota / Form Servis</label>
-    <div class="camera-wrap" id="notaCameraWrap" style="margin-bottom:10px;">
+    <label style="font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin: 18px 0 8px; display:block;">Foto nota / form servis</label>
+    <div class="camera-wrap" id="notaCameraWrap" style="aspect-ratio: 4/3; margin-bottom:10px;">
       <video id="notaVideo" autoplay playsinline muted style="display:none;"></video>
-      <div id="notaPlaceholder" style="padding:30px; text-align:center; color:rgba(255,255,255,0.6); font-size:13px;" onclick="openCamera('nota')">📷 Ketuk untuk ambil foto</div>
+      <img class="captured" id="notaImg" onclick="zoomPhoto('nota')">
+      <div class="camera-placeholder" id="notaPlaceholder" onclick="openCamera('nota')"><div class="ic">🧾</div><span>Ketuk untuk ambil foto</span></div>
+      <div class="photo-success-badge" id="notaBadge">✓</div>
+      <div class="photo-zoom-hint" id="notaZoomHint">⤢ Ketuk untuk perbesar</div>
     </div>
-    <div class="shutter-row" id="notaShutterRow" style="display:none;"><button class="shutter-btn" onclick="capturePhoto('nota')"></button></div>
-    <div class="retake-row" id="notaRetakeRow" style="display:none;"><button class="btn btn-outline" onclick="retakePhoto('nota')">Ambil Ulang</button></div>
+    <div class="shutter-row" id="notaShutterRow" style="display:none; margin-top:-14px; margin-bottom:10px;"><button class="shutter-btn" onclick="capturePhoto('nota')"></button></div>
+    <div class="retake-row" id="notaRetakeRow" style="display:none;"><button class="btn btn-outline" onclick="retakePhoto('nota')">↺ Ambil ulang</button></div>
     <canvas id="notaCanvas" style="display:none;"></canvas>
 
-    <div class="field" style="margin-top:16px;">
+    <div class="field" style="margin-top:18px;">
       <label>Kerusakan</label>
       <textarea id="lapKerusakan" placeholder="Jelaskan kerusakan yang ditemukan"></textarea>
     </div>
@@ -323,109 +417,114 @@
       <textarea id="lapPerbaikan" placeholder="Jelaskan perbaikan yang dilakukan"></textarea>
     </div>
     <div class="field">
-      <label>Sparepart Digunakan</label>
-      <input type="text" id="lapSparepart" placeholder="cth. Kabel, sensor, dll (kosongkan jika tidak ada)">
+      <label>Sparepart digunakan</label>
+      <input type="text" id="lapSparepart" placeholder="cth. Kabel, sensor (kosongkan jika tidak ada)">
     </div>
     <div class="field">
       <label>Biaya (Rp)</label>
       <input type="number" id="lapBiaya" placeholder="0" inputmode="numeric">
     </div>
     <div class="field">
-      <label>Catatan Tambahan</label>
+      <label>Catatan tambahan</label>
       <textarea id="lapCatatan" placeholder="Opsional"></textarea>
     </div>
   </div>
 
   <div class="bottom-bar" id="bar-laporan" style="display:none;">
-    <button class="btn btn-primary" onclick="submitLaporan()">Simpan Laporan</button>
+    <button class="btn btn-primary" onclick="submitLaporan()">Simpan laporan</button>
   </div>
 
-  <!-- ===================== SCREEN: CHECK OUT ===================== -->
-  <div class="screen" id="screen-checkout">
+  <!-- ============ CHECK OUT ============ -->
+  <div class="page" id="page-checkout">
     <div class="step-progress"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot current"></div></div>
-    <div class="section-title">Absen Pulang</div>
-    <div class="section-sub">Ambil foto selfie sebelum meninggalkan lokasi</div>
+    <div class="eyebrow">Langkah 4 dari 4</div>
+    <div class="section-title">Absen pulang</div>
+    <div class="section-sub">Selfie sekali lagi sebelum meninggalkan lokasi</div>
 
     <div class="gps-card loading" id="checkoutGpsCard"><div class="gps-spinner"></div><span>Mengambil lokasi GPS...</span></div>
 
     <div class="camera-wrap" id="checkoutCameraWrap">
       <video id="checkoutVideo" autoplay playsinline muted></video>
+      <img class="captured" id="checkoutImg" onclick="zoomPhoto('checkout')">
+      <div class="camera-frame-corner cf-tl"></div><div class="camera-frame-corner cf-tr"></div>
+      <div class="camera-frame-corner cf-bl"></div><div class="camera-frame-corner cf-br"></div>
+      <div class="photo-success-badge" id="checkoutBadge">✓</div>
+      <div class="photo-zoom-hint" id="checkoutZoomHint">⤢ Ketuk untuk perbesar</div>
     </div>
     <div class="shutter-row" id="checkoutShutterRow">
       <button class="shutter-btn" onclick="capturePhoto('checkout')"></button>
     </div>
     <div class="retake-row" id="checkoutRetakeRow" style="display:none;">
-      <button class="btn btn-outline" onclick="retakePhoto('checkout')">Ambil Ulang</button>
+      <button class="btn btn-outline" onclick="retakePhoto('checkout')">↺ Ambil ulang</button>
     </div>
     <canvas id="checkoutCanvas" style="display:none;"></canvas>
   </div>
 
   <div class="bottom-bar" id="bar-checkout" style="display:none;">
-    <button class="btn btn-danger" onclick="submitCheckOut()" id="btnSubmitCheckout" disabled>Kirim Absen Pulang</button>
+    <button class="btn btn-danger" onclick="submitCheckOut()" id="btnSubmitCheckout" disabled>Kirim absen pulang</button>
   </div>
 
-  <!-- ===================== SCREEN: SELESAI ===================== -->
-  <div class="screen" id="screen-selesai">
-    <div style="text-align:center; padding-top:60px;">
-      <div style="font-size:64px; margin-bottom:20px;">✅</div>
+  <!-- ============ SELESAI ============ -->
+  <div class="page" id="page-selesai">
+    <div class="done-wrap">
+      <div class="done-icon">✅</div>
       <div class="section-title">Selesai!</div>
       <p class="section-sub">Absen pulang & laporan hari ini sudah tersimpan.</p>
-      <button class="btn btn-primary" onclick="goHome()">Kembali ke Beranda</button>
+      <button class="btn btn-primary" onclick="goHome()">Kembali ke beranda</button>
     </div>
   </div>
 
 </div>
 
+<div class="preview-overlay" id="previewOverlay">
+  <img id="previewImg" src="">
+  <button class="close-preview" onclick="closePreview()">Tutup</button>
+</div>
+
 <div class="toast" id="toast"></div>
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-spinner"></div>
+  <div class="loading-spinner-lg"></div>
   <p id="loadingText">Mengirim data...</p>
 </div>
 
 <script>
 // =============================================
-// KONFIGURASI - GANTI DENGAN URL WEB APP KAMU
+// KONFIGURASI
 // =============================================
 const API_URL = "https://script.google.com/macros/s/AKfycbwOfjWnLaHMCsMx7IpGGMylcBYBL7KYp5FbL6NyAPCRSb1Z29rAN_l-RuMu9GoSbJ5n/exec";
-const RADIUS_LIMIT_METER = 200;
 
 // =============================================
 // STATE
 // =============================================
-let currentUser = null; // {id_teknisi, nama, username}
+let currentUser = null;
 let lokasiData = [];
 let selectedLokasi = null;
 let currentAbsensiId = null;
-let currentGps = null; // {latitude, longitude}
+let currentGps = null;
 let newLokasiGps = null;
-
-let streams = {}; // simpan MediaStream per konteks (checkin/checkout/hasil/nota)
-let capturedPhotos = {}; // simpan base64 per konteks
+let streams = {};
+let capturedPhotos = {};
+let activePage = "page-login";
 
 // =============================================
-// HELPER: API CALL
+// API
 // =============================================
 async function apiCall(payload) {
   const res = await fetch(API_URL, {
     method: "POST",
-    headers: { "Content-Type": "text/plain" }, // hindari preflight CORS di Apps Script
+    headers: { "Content-Type": "text/plain" },
     body: JSON.stringify(payload)
   });
   const text = await res.text();
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    throw new Error("Respons server tidak valid: " + text.substring(0, 200));
-  }
+  try { return JSON.parse(text); }
+  catch (e) { throw new Error("Respons server tidak valid: " + text.substring(0, 200)); }
 }
 
 function showLoading(text) {
   document.getElementById("loadingText").textContent = text || "Memproses...";
   document.getElementById("loadingOverlay").classList.add("show");
 }
-function hideLoading() {
-  document.getElementById("loadingOverlay").classList.remove("show");
-}
+function hideLoading() { document.getElementById("loadingOverlay").classList.remove("show"); }
 function showToast(msg) {
   const t = document.getElementById("toast");
   t.textContent = msg;
@@ -433,12 +532,26 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove("show"), 2800);
 }
 
-function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+// =============================================
+// NAVIGASI ANTAR HALAMAN (transisi slide)
+// =============================================
+function goTo(pageId, direction) {
+  const current = document.getElementById(activePage);
+  const next = document.getElementById(pageId);
+  current.classList.remove("active", "enter-fwd", "enter-back");
+  next.classList.add("active", direction === "back" ? "enter-back" : "enter-fwd");
   document.querySelectorAll(".bottom-bar").forEach(b => b.style.display = "none");
+  activePage = pageId;
   window.scrollTo(0, 0);
 }
+
+function zoomPhoto(ctx) {
+  const base64 = capturedPhotos[ctx];
+  if (!base64) return;
+  document.getElementById("previewImg").src = base64;
+  document.getElementById("previewOverlay").classList.add("show");
+}
+function closePreview() { document.getElementById("previewOverlay").classList.remove("show"); }
 
 // =============================================
 // LOGIN
@@ -463,13 +576,12 @@ async function doLogin() {
     const res = await apiCall({ action: "login", username, password });
     if (res.success) {
       currentUser = res;
-      sessionStorage_set("kdwk_user", JSON.stringify(res));
       document.getElementById("topbar").style.display = "flex";
       document.getElementById("userChip").textContent = res.nama;
       document.getElementById("homeNama").textContent = res.nama;
       await loadLokasiData();
       await refreshHomeStatus();
-      showScreen("screen-home");
+      goTo("page-home", "fwd");
     } else {
       errBox.textContent = res.message || "Login gagal.";
       errBox.classList.add("show");
@@ -485,21 +597,14 @@ async function doLogin() {
 
 function logout() {
   currentUser = null;
-  sessionStorage_clear();
   document.getElementById("topbar").style.display = "none";
   document.getElementById("loginUsername").value = "";
   document.getElementById("loginPassword").value = "";
-  showScreen("screen-login");
+  goTo("page-login", "back");
 }
 
-// Pengganti localStorage/sessionStorage (tidak dipakai karena keterbatasan artifact,
-// tapi di GitHub Pages asli sessionStorage AMAN dipakai). Di sini pakai variabel JS biasa.
-let memoryStore = {};
-function sessionStorage_set(k, v) { memoryStore[k] = v; }
-function sessionStorage_clear() { memoryStore = {}; }
-
 // =============================================
-// HOME / STATUS HARI INI
+// HOME
 // =============================================
 async function refreshHomeStatus() {
   try {
@@ -507,7 +612,7 @@ async function refreshHomeStatus() {
     const list = document.getElementById("riwayatList");
 
     if (!res.success || res.data.length === 0) {
-      list.innerHTML = '<p style="font-size:13px; color:var(--gray); padding:14px 0;">Belum ada aktivitas hari ini.</p>';
+      list.innerHTML = '<p class="empty-state">Belum ada aktivitas hari ini.</p>';
       document.getElementById("homeStatusText").textContent = "Belum absen hari ini";
       document.getElementById("btnMulaiAbsen").style.display = "block";
       document.getElementById("btnLanjutLaporan").style.display = "none";
@@ -522,8 +627,8 @@ async function refreshHomeStatus() {
     res.data.forEach(item => {
       const div = document.createElement("div");
       div.className = "riwayat-item";
-      const statusDone = item.jam_checkout ? "Selesai" : "Sedang bekerja";
-      div.innerHTML = `<div><div class="nm">${item.nama_client}</div><div class="tm">Datang ${item.jam_checkin}${item.jam_checkout ? " · Pulang " + item.jam_checkout : ""}</div></div><span class="badge ${item.jam_checkout ? 'green' : 'red'}">${statusDone}</span>`;
+      const statusDone = item.jam_checkout ? "Selesai" : "Sedang kerja";
+      div.innerHTML = `<div><div class="nm">${item.nama_client}</div><div class="tm">Datang ${item.jam_checkin}${item.jam_checkout ? " · Pulang " + item.jam_checkout : ""}</div></div><span class="badge ${item.jam_checkout ? 'green' : 'amber'}">${statusDone}</span>`;
       list.appendChild(div);
       if (!item.jam_checkout) lastOpenAbsensi = item;
     });
@@ -549,7 +654,7 @@ async function refreshHomeStatus() {
 
 function goHome() {
   refreshHomeStatus();
-  showScreen("screen-home");
+  goTo("page-home", "back");
 }
 
 // =============================================
@@ -564,18 +669,13 @@ async function loadLokasiData() {
   }
 }
 
-function mulaiAbsen() {
-  showScreen("screen-lokasi");
-  renderLokasiList();
-}
-
 function renderLokasiList() {
   const q = document.getElementById("searchLokasi").value.toLowerCase().trim();
   const container = document.getElementById("lokasiList");
   const filtered = lokasiData.filter(l => l.nama_client.toLowerCase().includes(q) || (l.alamat || "").toLowerCase().includes(q));
 
   if (filtered.length === 0) {
-    container.innerHTML = '<p style="font-size:13px; color:var(--gray); padding:20px 0; text-align:center;">Tidak ditemukan. Coba tambah lokasi baru.</p>';
+    container.innerHTML = '<p class="empty-state">Tidak ditemukan. Coba tambah lokasi baru.</p>';
     return;
   }
 
@@ -583,7 +683,7 @@ function renderLokasiList() {
   filtered.slice(0, 50).forEach(l => {
     const div = document.createElement("div");
     div.className = "lokasi-item";
-    div.innerHTML = `<div class="nm">${l.nama_client}</div><div class="ad">${l.alamat || ""}</div>`;
+    div.innerHTML = `<div class="ic">📍</div><div><div class="nm">${l.nama_client}</div><div class="ad">${l.alamat || ""}</div></div>`;
     div.onclick = () => selectLokasi(l);
     container.appendChild(div);
   });
@@ -596,7 +696,7 @@ function selectLokasi(l) {
 }
 
 function showTambahLokasi() {
-  showScreen("screen-tambah-lokasi");
+  goTo("page-tambah-lokasi", "fwd");
   document.getElementById("newNamaClient").value = "";
   document.getElementById("newAlamat").value = "";
   newLokasiGps = null;
@@ -629,11 +729,8 @@ async function simpanLokasiBaru() {
   showLoading("Menyimpan lokasi baru...");
   try {
     const res = await apiCall({
-      action: "tambahLokasi",
-      nama_client: nama,
-      alamat: alamat,
-      latitude: newLokasiGps.latitude,
-      longitude: newLokasiGps.longitude
+      action: "tambahLokasi", nama_client: nama, alamat: alamat,
+      latitude: newLokasiGps.latitude, longitude: newLokasiGps.longitude
     });
     if (res.success) {
       const newLoc = { id_lokasi: res.id_lokasi, nama_client: nama, alamat, latitude: newLokasiGps.latitude, longitude: newLokasiGps.longitude };
@@ -650,7 +747,7 @@ async function simpanLokasiBaru() {
 }
 
 // =============================================
-// KAMERA (generik untuk checkin/checkout/hasil/nota)
+// KAMERA
 // =============================================
 async function openCamera(ctx) {
   try {
@@ -681,20 +778,15 @@ function capturePhoto(ctx) {
   const base64 = canvas.toDataURL("image/jpeg", 0.92);
   capturedPhotos[ctx] = base64;
 
-  // stop stream, tampilkan hasil foto
   if (streams[ctx]) streams[ctx].getTracks().forEach(t => t.stop());
   video.style.display = "none";
 
-  const wrap = document.getElementById(ctx + "CameraWrap");
-  let img = wrap.querySelector("img.captured");
-  if (!img) {
-    img = document.createElement("img");
-    img.className = "captured";
-    wrap.appendChild(img);
-  }
+  const img = document.getElementById(ctx + "Img");
   img.src = base64;
   img.style.display = "block";
 
+  document.getElementById(ctx + "Badge").style.display = "flex";
+  document.getElementById(ctx + "ZoomHint").style.display = "block";
   document.getElementById(ctx + "ShutterRow").style.display = "none";
   const retakeRow = document.getElementById(ctx + "RetakeRow");
   if (retakeRow) retakeRow.style.display = "flex";
@@ -705,13 +797,13 @@ function capturePhoto(ctx) {
 
 function retakePhoto(ctx) {
   delete capturedPhotos[ctx];
-  const wrap = document.getElementById(ctx + "CameraWrap");
-  const img = wrap.querySelector("img.captured");
-  if (img) img.style.display = "none";
+  document.getElementById(ctx + "Img").style.display = "none";
+  document.getElementById(ctx + "Badge").style.display = "none";
+  document.getElementById(ctx + "ZoomHint").style.display = "none";
   document.getElementById(ctx + "RetakeRow").style.display = "none";
 
   if (ctx === "hasil" || ctx === "nota") {
-    document.getElementById(ctx + "Placeholder").style.display = "block";
+    document.getElementById(ctx + "Placeholder").style.display = "flex";
   } else {
     openCamera(ctx);
     document.getElementById(ctx + "ShutterRow").style.display = "flex";
@@ -721,13 +813,17 @@ function retakePhoto(ctx) {
 }
 
 // =============================================
-// CHECK IN FLOW
+// CHECK IN
 // =============================================
 function goToCheckin() {
-  showScreen("screen-checkin");
+  goTo("page-checkin", "fwd");
   document.getElementById("bar-checkin").style.display = "flex";
   currentGps = null;
   capturedPhotos["checkin"] = null;
+  document.getElementById("checkinBadge").style.display = "none";
+  document.getElementById("checkinZoomHint").style.display = "none";
+  document.getElementById("checkinImg").style.display = "none";
+  document.getElementById("checkinRetakeRow").style.display = "none";
   updateCheckinButtonState();
 
   const card = document.getElementById("checkinGpsCard");
@@ -759,21 +855,16 @@ async function submitCheckIn() {
   showLoading("Mengirim absen datang...");
   try {
     const res = await apiCall({
-      action: "checkIn",
-      id_teknisi: currentUser.id_teknisi,
-      nama_teknisi: currentUser.nama,
-      id_lokasi: selectedLokasi.id_lokasi,
-      nama_client: selectedLokasi.nama_client,
-      latitude: currentGps.latitude,
-      longitude: currentGps.longitude,
-      foto_base64: capturedPhotos["checkin"]
+      action: "checkIn", id_teknisi: currentUser.id_teknisi, nama_teknisi: currentUser.nama,
+      id_lokasi: selectedLokasi.id_lokasi, nama_client: selectedLokasi.nama_client,
+      latitude: currentGps.latitude, longitude: currentGps.longitude, foto_base64: capturedPhotos["checkin"]
     });
     if (res.success) {
       currentAbsensiId = res.id_absensi;
       let msg = "Absen datang berhasil!";
       if (res.status === "DI LUAR RADIUS") msg += ` ⚠️ Jarak ${res.jarak_meter}m dari titik client.`;
       showToast(msg);
-      showScreen("screen-laporan");
+      goTo("page-laporan", "fwd");
       document.getElementById("bar-laporan").style.display = "flex";
       resetLaporanForm();
     } else {
@@ -787,10 +878,10 @@ async function submitCheckIn() {
 }
 
 // =============================================
-// LAPORAN FLOW
+// LAPORAN
 // =============================================
 function lanjutKeLaporan() {
-  showScreen("screen-laporan");
+  goTo("page-laporan", "fwd");
   document.getElementById("bar-laporan").style.display = "flex";
   resetLaporanForm();
 }
@@ -798,10 +889,10 @@ function lanjutKeLaporan() {
 function resetLaporanForm() {
   ["hasil", "nota"].forEach(ctx => {
     capturedPhotos[ctx] = null;
-    const wrap = document.getElementById(ctx + "CameraWrap");
-    const img = wrap.querySelector("img.captured");
-    if (img) img.style.display = "none";
-    document.getElementById(ctx + "Placeholder").style.display = "block";
+    document.getElementById(ctx + "Img").style.display = "none";
+    document.getElementById(ctx + "Badge").style.display = "none";
+    document.getElementById(ctx + "ZoomHint").style.display = "none";
+    document.getElementById(ctx + "Placeholder").style.display = "flex";
     document.getElementById(ctx + "ShutterRow").style.display = "none";
     document.getElementById(ctx + "RetakeRow").style.display = "none";
   });
@@ -818,49 +909,31 @@ async function submitLaporan() {
   const kerusakan = document.getElementById("lapKerusakan").value.trim();
   const perbaikan = document.getElementById("lapPerbaikan").value.trim();
 
-  if (!kerusakan || !perbaikan) {
-    showToast("Kerusakan dan perbaikan wajib diisi");
-    return;
-  }
-  if (!capturedPhotos["hasil"]) {
-    showToast("Foto hasil pekerjaan wajib diambil");
-    return;
-  }
+  if (!kerusakan || !perbaikan) { showToast("Kerusakan dan perbaikan wajib diisi"); return; }
+  if (!capturedPhotos["hasil"]) { showToast("Foto hasil pekerjaan wajib diambil"); return; }
 
   showLoading("Menyimpan laporan...");
   try {
     const res = await apiCall({
-      action: "simpanLaporan",
-      id_absensi: currentAbsensiId,
-      nama_teknisi: currentUser.nama,
-      nama_client: selectedLokasi.nama_client,
-      kerusakan,
-      perbaikan,
+      action: "simpanLaporan", id_absensi: currentAbsensiId, nama_teknisi: currentUser.nama,
+      nama_client: selectedLokasi.nama_client, kerusakan, perbaikan,
       sparepart: document.getElementById("lapSparepart").value.trim(),
       biaya: document.getElementById("lapBiaya").value || 0,
       catatan: document.getElementById("lapCatatan").value.trim(),
       foto_base64: capturedPhotos["hasil"]
     });
 
-    // upload foto nota sebagai laporan kedua jika ada (pakai endpoint sama dengan flag berbeda)
     if (capturedPhotos["nota"]) {
       await apiCall({
-        action: "simpanLaporan",
-        id_absensi: currentAbsensiId,
-        nama_teknisi: currentUser.nama,
-        nama_client: selectedLokasi.nama_client,
-        kerusakan: "[FOTO NOTA/FORM SERVIS]",
-        perbaikan: "-",
-        sparepart: "-",
-        biaya: 0,
-        catatan: "Lampiran foto nota servis",
-        foto_base64: capturedPhotos["nota"]
+        action: "simpanLaporan", id_absensi: currentAbsensiId, nama_teknisi: currentUser.nama,
+        nama_client: selectedLokasi.nama_client, kerusakan: "[FOTO NOTA/FORM SERVIS]", perbaikan: "-",
+        sparepart: "-", biaya: 0, catatan: "Lampiran foto nota servis", foto_base64: capturedPhotos["nota"]
       });
     }
 
     if (res.success) {
       showToast("Laporan tersimpan!");
-      showScreen("screen-checkout");
+      goTo("page-checkout", "fwd");
       document.getElementById("bar-checkout").style.display = "flex";
       goToCheckoutPrep();
     } else {
@@ -874,10 +947,10 @@ async function submitLaporan() {
 }
 
 // =============================================
-// CHECK OUT FLOW
+// CHECK OUT
 // =============================================
 function mulaiAbsenPulang() {
-  showScreen("screen-checkout");
+  goTo("page-checkout", "fwd");
   document.getElementById("bar-checkout").style.display = "flex";
   goToCheckoutPrep();
 }
@@ -885,6 +958,10 @@ function mulaiAbsenPulang() {
 function goToCheckoutPrep() {
   currentGps = null;
   capturedPhotos["checkout"] = null;
+  document.getElementById("checkoutBadge").style.display = "none";
+  document.getElementById("checkoutZoomHint").style.display = "none";
+  document.getElementById("checkoutImg").style.display = "none";
+  document.getElementById("checkoutRetakeRow").style.display = "none";
   updateCheckoutButtonState();
 
   const card = document.getElementById("checkoutGpsCard");
@@ -916,16 +993,13 @@ async function submitCheckOut() {
   showLoading("Mengirim absen pulang...");
   try {
     const res = await apiCall({
-      action: "checkOut",
-      id_absensi: currentAbsensiId,
-      latitude: currentGps.latitude,
-      longitude: currentGps.longitude,
-      foto_base64: capturedPhotos["checkout"]
+      action: "checkOut", id_absensi: currentAbsensiId,
+      latitude: currentGps.latitude, longitude: currentGps.longitude, foto_base64: capturedPhotos["checkout"]
     });
     if (res.success) {
       showToast("Absen pulang berhasil!");
       currentAbsensiId = null;
-      showScreen("screen-selesai");
+      goTo("page-selesai", "fwd");
     } else {
       showToast(res.message || "Gagal mengirim absen pulang");
     }
@@ -935,7 +1009,7 @@ async function submitCheckOut() {
     hideLoading();
   }
 }
-
 </script>
+</div>
 </body>
 </html>
