@@ -194,14 +194,8 @@
     background: var(--ink); border-radius: var(--radius-lg); overflow: hidden; position: relative; margin-bottom: 14px;
     aspect-ratio: 4/5;
   }
-  /* Desktop: kamera tidak perlu sebesar layar penuh — batasi seperti ukuran mobile */
   @media (min-width: 760px) {
-    .camera-wrap {
-      max-width: 380px;
-      max-height: 420px;
-      margin-left: auto;
-      margin-right: auto;
-    }
+    .camera-wrap { max-width: 380px; max-height: 420px; margin-left: auto; margin-right: auto; }
   }
   video { width: 100%; height: 100%; display: block; object-fit: cover; }
   .camera-wrap img.captured { width: 100%; height: 100%; display: none; object-fit: cover; }
@@ -317,21 +311,24 @@
 
   /* LANDING */
   #page-landing.active {
-    display: flex; align-items: flex-end; justify-content: center; padding: 24px 18px 52px;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding: 24px 18px 40px;
     background: transparent; min-height: 100vh;
   }
+  /* Desktop: card di bawah area logo (logo ada di kiri atas background),
+     card diposisikan di tengah-kiri, sekitar 60% dari atas */
   @media (min-width: 760px) {
     #page-landing.active {
-      /* Posisi: bawah, agak kiri dari center — tidak terlalu ke pinggir */
+      align-items: center;
       justify-content: center;
-      padding-bottom: 80px;
+      padding-top: 55vh; /* dorong card ke bawah, di bawah area logo */
       padding-left: 80px;
-      align-items: flex-end;
+      padding-bottom: 0;
+      align-items: flex-start;
     }
   }
   .landing-card {
     width: 100%; max-width: 360px;
-    /* Kontras lebih baik: solid gelap semi-transparan agar teks putih jelas terbaca */
     background: rgba(15, 20, 35, 0.55);
     border: 1px solid rgba(255,255,255,0.20);
     border-radius: 26px; padding: 30px 26px;
@@ -369,7 +366,7 @@
   .menu-card .mc-desc { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
   .menu-card .mc-arrow { color: rgba(255,255,255,0.6); font-size: 16px; flex-shrink: 0; transition: transform 0.2s; }
   .menu-card:hover .mc-arrow { transform: translateX(3px); color: rgba(255,255,255,0.9); }
-  .landing-footer { text-align: center; font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 22px; font-style: italic; line-height: 1.5; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+  .landing-footer { text-align: center; font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 22px; font-style: italic; line-height: 1.5; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
 
   /* ADMIN */
   .page#page-admin-login.active { display: flex; align-items: center; justify-content: center; padding: 24px 18px; }
@@ -437,12 +434,7 @@
     .app.app-wide .admin-container { padding: 28px 32px 60px; }
   }
   .app.app-landing-mode { max-width: 100%; box-shadow: none; background: transparent; }
-  .app.app-process-mode {
-    background: rgba(255,255,255,0.84) !important;
-    backdrop-filter: blur(24px) saturate(1.4);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.25), 0 8px 48px rgba(0,0,0,0.18);
-  }
+  .app.app-process-mode { background: rgba(255,255,255,0.84) !important; backdrop-filter: blur(24px) saturate(1.4); -webkit-backdrop-filter: blur(24px) saturate(1.4); box-shadow: 0 0 0 1px rgba(255,255,255,0.25), 0 8px 48px rgba(0,0,0,0.18); }
 </style>
 </head>
 
