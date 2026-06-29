@@ -313,10 +313,12 @@
   }
   @media (min-width: 760px) {
     #page-landing.active {
-      /* Tengah vertikal, kiri dengan margin 1cm (≈38px) */
       justify-content: flex-start;
-      padding-left: 38px;
+      padding-left: 152px;  /* 38px awal + 3cm (≈114px) */
       align-items: center;
+    }
+    .landing-card {
+      margin-top: 38px; /* geser turun 1cm */
     }
   }
   .landing-card {
@@ -344,7 +346,7 @@
   }
   .menu-card:active { transform: scale(0.97); }
   .menu-card:hover {
-    background: rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.11);
     border-color: rgba(255,255,255,0.22);
     transform: translateY(-2px);
     box-shadow: 0 14px 28px -12px rgba(0,0,0,0.5);
