@@ -84,9 +84,11 @@
   }
   .topbar .brand { display: flex; align-items: center; gap: 10px; }
   .topbar .brand .mk {
-    width: 34px; height: 34px; border-radius: 9px; background: var(--blue);
-    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;
+    width: 34px; height: 34px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
   }
+  .topbar .brand .mk img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .topbar .brand .tx { font-size: 13.5px; font-weight: 700; line-height: 1.2; }
   .topbar .brand .tx small { display: block; font-size: 10.5px; font-weight: 500; opacity: 0.55; margin-top: 1px; letter-spacing: 0.3px; }
   .topbar .user-chip { font-size: 11.5px; font-weight: 600; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; }
@@ -113,11 +115,11 @@
   .login-mark { text-align: center; margin-bottom: 40px; }
   .login-mark .mk-big {
     width: 76px; height: 76px; border-radius: 20px; margin: 0 auto 18px;
-    background: linear-gradient(135deg, var(--ink) 0%, var(--blue-dark) 130%);
-    display: flex; align-items: center; justify-content: center; color: #fff;
-    font-size: 24px; font-weight: 800; letter-spacing: 0.5px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
     box-shadow: 0 14px 30px -8px rgba(37,99,235,0.45);
   }
+  .login-mark .mk-big img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .login-mark h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.2px; }
   .login-mark p { font-size: 13px; color: var(--muted); margin-top: 5px; font-weight: 500; }
 
@@ -351,8 +353,16 @@
 
   /* ADMIN */
   .page#page-admin-login.active { display: flex; align-items: center; justify-content: center; padding: 24px 18px; }
-  .admin-login-box { width: 100%; max-width: 360px; background: var(--surface); border-radius: var(--radius-lg); padding: 36px 30px; box-shadow: 0 20px 50px -15px rgba(11,17,32,0.18); }
-  .admin-login-box .mk { width: 60px; height: 60px; border-radius: 16px; background: linear-gradient(135deg, var(--ink), var(--blue-dark)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; margin: 0 auto 18px; }
+  .admin-login-box {
+    width: 100%; max-width: 360px;
+    background: rgba(255,255,255,0.9);
+    border-radius: var(--radius-lg); padding: 36px 30px;
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.4);
+  }
+  .admin-login-box .mk { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; overflow: hidden; }
+  .admin-login-box .mk img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .admin-login-box h1 { text-align: center; font-size: 17px; font-weight: 800; margin-bottom: 4px; }
   .admin-login-box p { text-align: center; font-size: 12.5px; color: var(--muted); margin-bottom: 24px; }
 
@@ -362,7 +372,8 @@
     display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50;
   }
   .admin-topbar .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 13px; }
-  .admin-topbar .brand .mk { width: 30px; height: 30px; border-radius: 8px; background: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 10.5px; }
+  .admin-topbar .brand .mk { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+  .admin-topbar .brand .mk img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .admin-topbar .logout { background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 7px 14px; border-radius: 20px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
 
   .admin-container { padding: 20px 16px 60px; }
@@ -413,7 +424,7 @@
 <div class="app app-landing-mode">
   <div class="topbar" id="topbar" style="display:none;">
     <div class="brand">
-      <div class="mk">KDK</div>
+      <div class="mk"><img src="LOGO_KDK.png" alt="KDK"></div>
       <div class="tx">KHARISMA DWI KARYA<small>System Report Teknisi</small></div>
     </div>
     <div style="display:flex; align-items:center;">
@@ -452,7 +463,7 @@
     <div class="login-card">
       <button class="back-btn" onclick="goTo('page-landing','back')"><span class="arrow">‹</span> Kembali</button>
       <div class="login-mark">
-        <div class="mk-big">KDK</div>
+        <div class="mk-big"><img src="LOGO_KDK.png" alt="KDK"></div>
         <h1>Kharisma Dwi Karya</h1>
         <p>Operating System</p>
       </div>
@@ -674,7 +685,7 @@
   <div class="page" id="page-admin-login">
     <div class="admin-login-box">
       <button class="back-btn" style="margin-bottom:18px;" onclick="goTo('page-landing','back')"><span class="arrow">‹</span> Kembali</button>
-      <div class="mk">KDK</div>
+      <div class="mk"><img src="LOGO_KDK.png" alt="KDK"></div>
       <h1>Dashboard Admin</h1>
       <p>Kharisma Dwi Karya · Sistem Report</p>
       <div class="error-msg" id="adminErr">Password salah</div>
@@ -688,7 +699,7 @@
   <!-- ADMIN DASHBOARD -->
   <div class="page" id="page-admin-dashboard">
     <div class="admin-topbar">
-      <div class="brand"><div class="mk">KDK</div> Dashboard Admin · KHARISMA DWI KARYA</div>
+      <div class="brand"><div class="mk"><img src="LOGO_KDK.png" alt="KDK"></div> Dashboard Admin · KHARISMA DWI KARYA</div>
       <button class="logout" onclick="adminLogout()">Keluar</button>
     </div>
     <div class="admin-container">
@@ -796,7 +807,7 @@ function goTo(pageId, direction) {
   window.scrollTo(0, 0);
   const appEl = document.querySelector(".app");
   appEl.classList.toggle("app-wide", pageId === "page-admin-dashboard");
-  const useBg = (pageId === "page-landing" || pageId === "page-login");
+  const useBg = (pageId === "page-landing" || pageId === "page-login" || pageId === "page-admin-login");
   appEl.classList.toggle("app-landing-mode", useBg);
   document.body.classList.toggle("landing-bg", useBg);
 }
