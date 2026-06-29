@@ -41,6 +41,27 @@
     overflow-x: hidden;
   }
 
+  /* Background landing — dipasang di body (bukan di .app) supaya selalu full-screen,
+     tidak terbatas oleh max-width 480px milik .app.
+     Lapisan gelap dibuat tipis (cuma 0.15-0.25) supaya warna asli gambar tetap terang/jelas,
+     dan hanya berfungsi sedikit menstabilkan kontras teks card di atasnya. */
+  body.landing-bg {
+    background-image:
+      linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.25) 100%),
+      url('KDK2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+  @media (min-width: 760px) {
+    body.landing-bg {
+      background-image:
+        linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.25) 100%),
+        url('KDK1.png');
+    }
+  }
+
   .app {
     max-width: 480px;
     margin: 0 auto;
@@ -278,28 +299,15 @@
   /* LANDING */
   #page-landing.active {
     display: flex; align-items: center; justify-content: center; padding: 24px 18px;
-    background-image:
-      linear-gradient(160deg, rgba(11,17,32,0.55) 0%, rgba(13,23,48,0.65) 100%),
-      url('KDK2.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-  }
-  @media (min-width: 760px) {
-    #page-landing.active {
-      background-image:
-        linear-gradient(160deg, rgba(11,17,32,0.55) 0%, rgba(13,23,48,0.65) 100%),
-        url('KDK1.png');
-    }
+    background: transparent;
   }
   .landing-card {
     width: 100%; max-width: 400px;
     background: rgba(255,255,255,0.07);
     border: 1px solid rgba(255,255,255,0.12);
     border-radius: 26px; padding: 30px 26px;
-    backdrop-filter: blur(14px) saturate(140%);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%) brightness(0.85);
+    -webkit-backdrop-filter: blur(14px) saturate(140%) brightness(0.85);
     box-shadow: 0 30px 60px -20px rgba(0,0,0,0.55);
     transition: background 0.25s, border-color 0.25s;
   }
@@ -389,12 +397,12 @@
   @media (min-width: 760px) {
     .app.app-wide .admin-container { padding: 28px 32px 60px; }
   }
-  .app.app-landing-mode { max-width: 100%; box-shadow: none; }
+  .app.app-landing-mode { max-width: 100%; box-shadow: none; background: transparent; }
 </style>
 </head>
 
-<body>
-<div class="app">
+<body class="landing-bg">
+<div class="app app-landing-mode">
   <div class="topbar" id="topbar" style="display:none;">
     <div class="brand">
       <div class="mk">KDK</div>
@@ -781,6 +789,7 @@ function goTo(pageId, direction) {
   const appEl = document.querySelector(".app");
   appEl.classList.toggle("app-wide", pageId === "page-admin-dashboard");
   appEl.classList.toggle("app-landing-mode", pageId === "page-landing");
+  document.body.classList.toggle("landing-bg", pageId === "page-landing");
 }
 
 function stopStream(ctx) {
