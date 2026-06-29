@@ -183,9 +183,15 @@
     padding: 6px 11px; border-radius: 20px; display: none; backdrop-filter: blur(4px);
   }
 
-  .shutter-row { display: flex; align-items: center; justify-content: center; padding: 18px; background: var(--ink); gap: 24px; }
+  .shutter-row { display: flex; align-items: center; justify-content: center; padding: 18px; background: var(--ink); gap: 24px; position: relative; }
   .shutter-btn { width: 62px; height: 62px; border-radius: 50%; background: #fff; border: 4px solid rgba(255,255,255,0.25); transition: transform 0.12s; }
   .shutter-btn:active { transform: scale(0.88); }
+  .flip-cam-btn {
+    position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+    width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.12);
+    border: none; color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center;
+  }
+  .flip-cam-btn:active { background: rgba(255,255,255,0.25); transform: translateY(-50%) scale(0.9); }
   .retake-row { display: flex; gap: 10px; margin-bottom: 14px; }
 
   .camera-placeholder {
@@ -499,6 +505,7 @@
     </div>
     <div class="shutter-row" id="checkinShutterRow" style="display:none;">
       <button class="shutter-btn" onclick="capturePhoto('checkin')"></button>
+      <button class="flip-cam-btn" onclick="flipCamera('checkin')" title="Ganti kamera">🔄</button>
     </div>
     <div class="retake-row" id="checkinRetakeRow" style="display:none;">
       <button class="btn btn-outline" onclick="retakePhoto('checkin')">↺ Ambil ulang</button>
@@ -518,7 +525,7 @@
     <div class="section-title">Laporan servis</div>
     <div class="section-sub">Isi detail pekerjaan yang sudah dilakukan</div>
 
-    <label class="field-label-sm">1. Foto hasil pekerjaan</label>
+    <label class="field-label-sm">1. Foto hasil pekerjaan <span style="color:var(--red); text-transform:none;">*</span></label>
     <div class="camera-wrap" id="hasilCameraWrap" style="aspect-ratio: 4/3; margin-bottom:10px;">
       <video id="hasilVideo" autoplay playsinline muted style="display:none;"></video>
       <img class="captured" id="hasilImg" onclick="zoomPhoto('hasil')">
@@ -526,11 +533,11 @@
       <div class="photo-success-badge" id="hasilBadge">✓</div>
       <div class="photo-zoom-hint" id="hasilZoomHint">⤢ Ketuk untuk perbesar</div>
     </div>
-    <div class="shutter-row" id="hasilShutterRow" style="display:none; margin-top:-14px; margin-bottom:10px;"><button class="shutter-btn" onclick="capturePhoto('hasil')"></button></div>
+    <div class="shutter-row" id="hasilShutterRow" style="display:none; margin-top:-14px; margin-bottom:10px;"><button class="shutter-btn" onclick="capturePhoto('hasil')"></button><button class="flip-cam-btn" onclick="flipCamera('hasil')" title="Ganti kamera">🔄</button></div>
     <div class="retake-row" id="hasilRetakeRow" style="display:none;"><button class="btn btn-outline" onclick="retakePhoto('hasil')">↺ Ambil ulang</button></div>
     <canvas id="hasilCanvas" style="display:none;"></canvas>
 
-    <label class="field-label-sm" style="margin-top:18px;">2. Foto Service Report</label>
+    <label class="field-label-sm" style="margin-top:18px;">2. Foto Service Report <span style="color:var(--red); text-transform:none;">*</span></label>
     <div class="camera-wrap" id="reportCameraWrap" style="aspect-ratio: 4/3; margin-bottom:10px;">
       <video id="reportVideo" autoplay playsinline muted style="display:none;"></video>
       <img class="captured" id="reportImg" onclick="zoomPhoto('report')">
@@ -538,20 +545,37 @@
       <div class="photo-success-badge" id="reportBadge">✓</div>
       <div class="photo-zoom-hint" id="reportZoomHint">⤢ Ketuk untuk perbesar</div>
     </div>
-    <div class="shutter-row" id="reportShutterRow" style="display:none; margin-top:-14px; margin-bottom:10px;"><button class="shutter-btn" onclick="capturePhoto('report')"></button></div>
+    <div class="shutter-row" id="reportShutterRow" style="display:none; margin-top:-14px; margin-bottom:10px;"><button class="shutter-btn" onclick="capturePhoto('report')"></button><button class="flip-cam-btn" onclick="flipCamera('report')" title="Ganti kamera">🔄</button></div>
     <div class="retake-row" id="reportRetakeRow" style="display:none;"><button class="btn btn-outline" onclick="retakePhoto('report')">↺ Ambil ulang</button></div>
     <canvas id="reportCanvas" style="display:none;"></canvas>
 
     <div class="field" style="margin-top:18px;">
-      <label>3. Kondisi mesin</label>
+      <label>3. Kondisi mesin <span style="color:var(--red);">*</span></label>
       <textarea id="lapKondisiMesin" placeholder="Jelaskan kondisi mesin yang ditemukan/setelah servis"></textarea>
     </div>
     <div class="field">
-      <label>4. Suku cadang yang perlu diganti</label>
-      <textarea id="lapSparepart" placeholder="cth. Filter udara, sensor suhu (kosongkan jika tidak ada)"></textarea>
+      <label>4. Suku cadang yang diganti <span style="color:var(--red);">*</span></label>
+      <textarea id="lapSparepart" placeholder="cth. Filter udara, sensor suhu"></textarea>
     </div>
     <div class="field">
-      <label>5. Catatan</label>
+      <label>5. Video mesin yang diservis <span style="color:var(--muted); font-weight:600; text-transform:none; letter-spacing:0;">(opsional)</span></label>
+      <div class="camera-wrap" id="videoCameraWrap" style="aspect-ratio: 4/3; margin-bottom:10px; background: var(--ink);">
+        <video id="videoLive" autoplay playsinline muted style="display:none;"></video>
+        <video id="videoPlayback" controls style="display:none; width:100%; height:100%; object-fit:cover;"></video>
+        <div class="camera-placeholder" id="videoPlaceholder" onclick="openVideoCamera()"><div class="ic">🎥</div><span>Ketuk untuk rekam video (opsional)</span></div>
+        <div class="photo-success-badge" id="videoBadge">✓</div>
+      </div>
+      <div class="shutter-row" id="videoShutterRow" style="display:none; margin-top:-14px; margin-bottom:10px;">
+        <button class="shutter-btn" id="videoShutterBtn" onclick="toggleRecordVideo()" style="background:var(--red);"></button>
+        <button class="flip-cam-btn" onclick="flipCamera('video')" title="Ganti kamera">🔄</button>
+      </div>
+      <div class="retake-row" id="videoRetakeRow" style="display:none;">
+        <button class="btn btn-outline" onclick="retakeVideo()">↺ Rekam ulang</button>
+        <button class="btn btn-outline" onclick="hapusVideo()">✕ Hapus video</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>6. Catatan <span style="color:var(--muted); font-weight:600; text-transform:none; letter-spacing:0;">(opsional)</span></label>
       <textarea id="lapCatatan" placeholder="Catatan tambahan (opsional)"></textarea>
     </div>
   </div>
@@ -582,6 +606,7 @@
     </div>
     <div class="shutter-row" id="checkoutShutterRow" style="display:none;">
       <button class="shutter-btn" onclick="capturePhoto('checkout')"></button>
+      <button class="flip-cam-btn" onclick="flipCamera('checkout')" title="Ganti kamera">🔄</button>
     </div>
     <div class="retake-row" id="checkoutRetakeRow" style="display:none;">
       <button class="btn btn-outline" onclick="retakePhoto('checkout')">↺ Ambil ulang</button>
@@ -654,8 +679,8 @@
         </div>
         <div class="admin-table-scroll">
           <table class="admin-table">
-            <thead><tr><th>Tanggal</th><th>Teknisi</th><th>Client</th><th>Kondisi Mesin</th><th>Sparepart</th><th>Catatan</th><th>Foto Hasil</th><th>Foto Report</th></tr></thead>
-            <tbody id="laporanBody"><tr><td colspan="8"><div class="loading-row">Memuat data...</div></td></tr></tbody>
+            <thead><tr><th>Tanggal</th><th>Teknisi</th><th>Client</th><th>Kondisi Mesin</th><th>Sparepart</th><th>Catatan</th><th>Foto Hasil</th><th>Foto Report</th><th>Video</th></tr></thead>
+            <tbody id="laporanBody"><tr><td colspan="9"><div class="loading-row">Memuat data...</div></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -686,6 +711,11 @@ let newLokasiGps = null;
 let streams = {};
 let capturedPhotos = {};
 let activePage = "page-landing";
+
+let capturedVideoBase64 = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+let videoFacingMode = { checkin: "user", checkout: "user", hasil: "environment", report: "environment", video: "environment" };
 
 // GPS state per step — disimpan supaya tidak hilang saat kembali
 let checkinGpsState = null;   // { latitude, longitude, accuracy }
@@ -769,6 +799,10 @@ function kembaliDariLaporan() {
       document.getElementById(ctx + "Placeholder").style.display = "flex";
     }
   });
+  // Matikan kamera video kalau masih aktif (video yang sudah direkam tetap di capturedVideoBase64)
+  stopStream("video");
+  document.getElementById("videoLive").style.display = "none";
+  document.getElementById("videoShutterRow").style.display = "none";
   goTo("page-checkin", "back");
   // Tampilkan bottom bar checkin lagi
   document.getElementById("bar-checkin").style.display = "flex";
@@ -1007,7 +1041,7 @@ async function simpanLokasiBaru() {
 async function openCamera(ctx) {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: (ctx === "checkin" || ctx === "checkout") ? "user" : "environment" },
+      video: { facingMode: videoFacingMode[ctx] },
       audio: false
     });
     streams[ctx] = stream;
@@ -1052,6 +1086,116 @@ function retakePhoto(ctx) {
   document.getElementById(ctx + "Placeholder").style.display = "flex";
   if (ctx === "checkin") updateCheckinButtonState();
   if (ctx === "checkout") updateCheckoutButtonState();
+}
+
+// ============================================================
+// VIDEO MESIN (opsional) — rekam langsung dari browser
+// ============================================================
+async function openVideoCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: videoFacingMode.video },
+      audio: true
+    });
+    streams["video"] = stream;
+    const liveVideo = document.getElementById("videoLive");
+    liveVideo.srcObject = stream;
+    liveVideo.style.display = "block";
+    document.getElementById("videoPlaceholder").style.display = "none";
+    document.getElementById("videoShutterRow").style.display = "flex";
+  } catch (e) {
+    showToast("Tidak bisa akses kamera. Periksa izin kamera di pengaturan browser.");
+  }
+}
+
+function toggleRecordVideo() {
+  if (mediaRecorder && mediaRecorder.state === "recording") {
+    mediaRecorder.stop();
+    return;
+  }
+  const stream = streams["video"];
+  if (!stream) return;
+  recordedChunks = [];
+  let mimeType = "video/webm";
+  if (MediaRecorder.isTypeSupported("video/mp4")) mimeType = "video/mp4";
+  else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) mimeType = "video/webm;codecs=vp9";
+  try {
+    mediaRecorder = new MediaRecorder(stream, { mimeType });
+  } catch (e) {
+    mediaRecorder = new MediaRecorder(stream);
+  }
+  mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = onVideoRecordStop;
+  mediaRecorder.start();
+  document.getElementById("videoShutterBtn").style.background = "#888";
+  showToast("Merekam... ketuk lagi untuk berhenti");
+}
+
+function onVideoRecordStop() {
+  const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || "video/webm" });
+  stopStream("video");
+  const reader = new FileReader();
+  reader.onload = () => {
+    capturedVideoBase64 = reader.result;
+    const liveVideo = document.getElementById("videoLive");
+    const playback = document.getElementById("videoPlayback");
+    liveVideo.style.display = "none";
+    playback.src = capturedVideoBase64;
+    playback.style.display = "block";
+    document.getElementById("videoBadge").style.display = "flex";
+    document.getElementById("videoShutterRow").style.display = "none";
+    document.getElementById("videoRetakeRow").style.display = "flex";
+  };
+  reader.readAsDataURL(blob);
+}
+
+function retakeVideo() {
+  capturedVideoBase64 = null;
+  document.getElementById("videoPlayback").style.display = "none";
+  document.getElementById("videoBadge").style.display = "none";
+  document.getElementById("videoRetakeRow").style.display = "none";
+  openVideoCamera();
+}
+
+function hapusVideo() {
+  capturedVideoBase64 = null;
+  stopStream("video");
+  document.getElementById("videoPlayback").style.display = "none";
+  document.getElementById("videoBadge").style.display = "none";
+  document.getElementById("videoRetakeRow").style.display = "none";
+  document.getElementById("videoPlaceholder").style.display = "flex";
+}
+
+function resetVideoForm() {
+  capturedVideoBase64 = null;
+  stopStream("video");
+  if (mediaRecorder && mediaRecorder.state === "recording") { try { mediaRecorder.stop(); } catch(e){} }
+  document.getElementById("videoLive").style.display = "none";
+  document.getElementById("videoPlayback").style.display = "none";
+  document.getElementById("videoBadge").style.display = "none";
+  document.getElementById("videoShutterRow").style.display = "none";
+  document.getElementById("videoRetakeRow").style.display = "none";
+  document.getElementById("videoPlaceholder").style.display = "flex";
+}
+
+// ============================================================
+// TOGGLE KAMERA DEPAN/BELAKANG
+// ============================================================
+async function flipCamera(ctx) {
+  videoFacingMode[ctx] = videoFacingMode[ctx] === "user" ? "environment" : "user";
+  stopStream(ctx);
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: videoFacingMode[ctx] },
+      audio: ctx === "video"
+    });
+    streams[ctx] = stream;
+    const videoEl = document.getElementById((ctx === "video" ? "videoLive" : ctx + "Video"));
+    videoEl.srcObject = stream;
+  } catch (e) {
+    showToast("Tidak bisa beralih kamera di perangkat ini.");
+    videoFacingMode[ctx] = videoFacingMode[ctx] === "user" ? "environment" : "user";
+  }
 }
 
 function goToCheckin() {
@@ -1147,6 +1291,7 @@ function resetLaporanForm() {
     document.getElementById(ctx + "ShutterRow").style.display = "none";
     document.getElementById(ctx + "RetakeRow").style.display = "none";
   });
+  resetVideoForm();
   document.getElementById("lapKondisiMesin").value = "";
   document.getElementById("lapSparepart").value = "";
   document.getElementById("lapCatatan").value = "";
@@ -1155,9 +1300,11 @@ function resetLaporanForm() {
 async function submitLaporan() {
   if (!currentAbsensiId) { showToast("Sesi absen tidak ditemukan, ulangi dari absen datang."); return; }
   const kondisiMesin = document.getElementById("lapKondisiMesin").value.trim();
-  if (!kondisiMesin) { showToast("Kondisi mesin wajib diisi"); return; }
+  const sparepart = document.getElementById("lapSparepart").value.trim();
   if (!capturedPhotos["hasil"]) { showToast("Foto hasil pekerjaan wajib diambil"); return; }
   if (!capturedPhotos["report"]) { showToast("Foto Service Report wajib diambil"); return; }
+  if (!kondisiMesin) { showToast("Kondisi mesin wajib diisi"); return; }
+  if (!sparepart) { showToast("Sparepart yang diganti wajib diisi"); return; }
   showLoading("Menyimpan laporan...");
   try {
     const res = await apiCall({
@@ -1167,8 +1314,9 @@ async function submitLaporan() {
       nama_client: selectedLokasi.nama_client,
       foto_hasil_base64: capturedPhotos["hasil"],
       foto_report_base64: capturedPhotos["report"],
+      video_base64: capturedVideoBase64 || "",
       kondisi_mesin: kondisiMesin,
-      sparepart: document.getElementById("lapSparepart").value.trim(),
+      sparepart: sparepart,
       catatan: document.getElementById("lapCatatan").value.trim()
     });
     if (res.success) {
@@ -1347,9 +1495,28 @@ function statusPillAdmin(item) {
   return '<span class="pill green"><span class="dot"></span>Selesai</span>';
 }
 
+// Drive file ID dipakai untuk 2 URL berbeda:
+// - thumbnail: paling stabil untuk ditampilkan sebagai <img> (dipakai di tabel)
+// - uc?id=: dipakai saat preview/zoom penuh (resolusi lebih tinggi)
+function driveFileId(url) {
+  if (!url) return null;
+  var m = url.match(/[-\w]{25,}/);
+  return m ? m[0] : null;
+}
+function driveThumbUrl(url) {
+  var id = driveFileId(url);
+  return id ? ("https://drive.google.com/thumbnail?id=" + id + "&sz=w200") : url;
+}
+function driveFullUrl(url) {
+  var id = driveFileId(url);
+  return id ? ("https://drive.google.com/thumbnail?id=" + id + "&sz=w1600") : url;
+}
+
 function photoThumbAdmin(url) {
   if (!url || url.startsWith("ERROR_UPLOAD") || url === "") return '<span style="color:var(--muted); font-size:11px;">—</span>';
-  return `<img class="photo-thumb" src="${url}" onclick="zoomPhoto2('${url}')" loading="lazy">`;
+  var thumb = driveThumbUrl(url);
+  var full = driveFullUrl(url);
+  return `<img class="photo-thumb" src="${thumb}" onclick="zoomPhoto2('${full}')" loading="lazy" onerror="this.onerror=null;this.src='${url}';">`;
 }
 
 function zoomPhoto2(url) {
@@ -1385,7 +1552,7 @@ function renderAbsensiTable() {
 function renderLaporanTable() {
   const tbody = document.getElementById("laporanBody");
   if (dashLaporan.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-row">Belum ada laporan servis.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-row">Belum ada laporan servis.</td></tr>';
     return;
   }
   tbody.innerHTML = dashLaporan.map(l => `
@@ -1398,6 +1565,7 @@ function renderLaporanTable() {
       <td style="max-width:160px;">${l.catatan || "-"}</td>
       <td>${photoThumbAdmin(l.foto_hasil)}</td>
       <td>${photoThumbAdmin(l.foto_report)}</td>
+      <td>${l.video && !l.video.startsWith("ERROR_UPLOAD") ? `<a class="link-maps" target="_blank" href="${l.video}">▶ Lihat</a>` : '<span style="color:var(--muted); font-size:11px;">—</span>'}</td>
     </tr>`).join("");
 }
 
@@ -1408,8 +1576,8 @@ function exportCsv(type) {
     rows = dashAbsensi.map(a => [a.tanggal, a.nama_teknisi, a.nama_client, a.jam_checkin, a.jam_checkout, a.status, a.jarak_meter, a.lat_checkin, a.lng_checkin]);
     filename = "rekap_absensi_kdwk.csv";
   } else {
-    headers = ["Tanggal","Teknisi","Client","Kondisi Mesin","Sparepart Diganti","Catatan"];
-    rows = dashLaporan.map(l => [l.tanggal, l.nama_teknisi, l.nama_client, l.kondisi_mesin, l.sparepart, l.catatan]);
+    headers = ["Tanggal","Teknisi","Client","Kondisi Mesin","Sparepart Diganti","Catatan","Link Video"];
+    rows = dashLaporan.map(l => [l.tanggal, l.nama_teknisi, l.nama_client, l.kondisi_mesin, l.sparepart, l.catatan, l.video || ""]);
     filename = "rekap_laporan_kdwk.csv";
   }
   const csvContent = [headers.join(","), ...rows.map(r => r.map(cell => `"${String(cell || "").replace(/"/g, '""')}"`).join(","))].join("\n");
