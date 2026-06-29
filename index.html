@@ -278,32 +278,60 @@
   /* LANDING */
   #page-landing.active {
     display: flex; align-items: center; justify-content: center; padding: 24px 18px;
-    background: radial-gradient(circle at 18% 12%, rgba(37,99,235,0.35), transparent 45%),
-                linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 55%, #0d1730 100%);
-    background-size: cover; background-position: center;
+    background-image:
+      linear-gradient(160deg, rgba(11,17,32,0.55) 0%, rgba(13,23,48,0.65) 100%),
+      url('KDK2.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
   }
-  .landing-card { width: 100%; max-width: 400px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 26px; padding: 34px 26px; backdrop-filter: blur(6px); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5); }
-  .landing-eyebrow { text-align: center; font-size: 11px; font-weight: 800; color: #93c5fd; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
-  .landing-title { text-align: center; font-size: 28px; font-weight: 800; color: #fff; letter-spacing: 0.5px; margin-bottom: 6px; }
-  .landing-sub { text-align: center; font-size: 12.5px; color: rgba(255,255,255,0.55); margin-bottom: 28px; line-height: 1.5; }
+  @media (min-width: 760px) {
+    #page-landing.active {
+      background-image:
+        linear-gradient(160deg, rgba(11,17,32,0.55) 0%, rgba(13,23,48,0.65) 100%),
+        url('KDK1.png');
+    }
+  }
+  .landing-card {
+    width: 100%; max-width: 400px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 26px; padding: 30px 26px;
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.55);
+    transition: background 0.25s, border-color 0.25s;
+  }
+  .landing-card:hover {
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(255,255,255,0.18);
+  }
 
   .menu-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
   .menu-card {
     display: flex; align-items: center; gap: 14px; padding: 15px 16px; border-radius: 16px;
-    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
-    cursor: pointer; transition: transform 0.12s, background 0.15s; text-align: left;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10);
+    cursor: pointer; transition: transform 0.18s cubic-bezier(.2,.8,.3,1), background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    text-align: left;
   }
   .menu-card:active { transform: scale(0.97); }
-  .menu-card:hover { background: rgba(255,255,255,0.09); }
-  .menu-card .mc-ic { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
-  .menu-card.mc-green .mc-ic { background: rgba(16,185,129,0.18); }
-  .menu-card.mc-blue .mc-ic { background: rgba(37,99,235,0.2); }
+  .menu-card:hover {
+    background: rgba(255,255,255,0.11);
+    border-color: rgba(255,255,255,0.22);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px -12px rgba(0,0,0,0.5);
+  }
+  .menu-card .mc-ic { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; transition: transform 0.2s; }
+  .menu-card:hover .mc-ic { transform: scale(1.08); }
+  .menu-card.mc-green .mc-ic { background: rgba(16,185,129,0.22); }
+  .menu-card.mc-blue .mc-ic { background: rgba(37,99,235,0.25); }
   .menu-card .mc-body { flex: 1; min-width: 0; }
   .menu-card .mc-title { font-size: 14px; font-weight: 700; color: #fff; }
-  .menu-card .mc-desc { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
-  .menu-card .mc-arrow { color: rgba(255,255,255,0.35); font-size: 16px; flex-shrink: 0; }
-  .landing-footer { text-align: center; font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 26px; font-style: italic; line-height: 1.5; }
+  .menu-card .mc-desc { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+  .menu-card .mc-arrow { color: rgba(255,255,255,0.4); font-size: 16px; flex-shrink: 0; transition: transform 0.2s; }
+  .menu-card:hover .mc-arrow { transform: translateX(3px); color: rgba(255,255,255,0.7); }
+  .landing-footer { text-align: center; font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 22px; font-style: italic; line-height: 1.5; }
 
   /* ADMIN */
   .page#page-admin-login.active { display: flex; align-items: center; justify-content: center; padding: 24px 18px; }
@@ -381,9 +409,6 @@
   <!-- LANDING -->
   <div class="page active" id="page-landing">
     <div class="landing-card">
-      <div class="landing-eyebrow">Sistem Report</div>
-      <div class="landing-title">KHARISMA<br>DWI KARYA</div>
-      <p class="landing-sub">Catat kehadiran teknisi, pantau lokasi servis,<br>dan kelola laporan secara real-time.</p>
       <div class="menu-stack">
         <div class="menu-card mc-green" onclick="goTo('page-login','fwd')">
           <div class="mc-ic">🛠️</div>
