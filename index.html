@@ -308,8 +308,16 @@
 
   /* LANDING */
   #page-landing.active {
-    display: flex; align-items: center; justify-content: center; padding: 24px 18px;
-    background: transparent;
+    display: flex; align-items: flex-end; justify-content: center; padding: 24px 18px 48px;
+    background: transparent; min-height: 100vh;
+  }
+  /* Desktop: lebih ke bawah-tengah */
+  @media (min-width: 760px) {
+    #page-landing.active {
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 60px;
+    }
   }
   .landing-card {
     width: 100%; max-width: 400px;
@@ -417,6 +425,16 @@
     .app.app-wide .admin-container { padding: 28px 32px 60px; }
   }
   .app.app-landing-mode { max-width: 100%; box-shadow: none; background: transparent; }
+
+  /* Halaman proses teknisi (home, lokasi, checkin, laporan, checkout, selesai):
+     .app pakai frosted glass ringan supaya konten tetap terbaca di atas background foto */
+  .app.app-process-mode {
+    background: rgba(255,255,255,0.82) !important;
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.25), 0 8px 48px rgba(0,0,0,0.18);
+  }
+
 </style>
 </head>
 
@@ -425,7 +443,7 @@
   <div class="topbar" id="topbar" style="display:none;">
     <div class="brand">
       <div class="mk"><img src="LOGO_KDK.png" alt="KDK"></div>
-      <div class="tx">KHARISMA DWI KARYA<small>System Report Teknisi</small></div>
+      <div class="tx">KHARISMA DWI KARYA<small>Operating System</small></div>
     </div>
     <div style="display:flex; align-items:center;">
       <div class="user-chip" id="userChip"></div>
@@ -687,7 +705,7 @@
       <button class="back-btn" style="margin-bottom:18px;" onclick="goTo('page-landing','back')"><span class="arrow">‹</span> Kembali</button>
       <div class="mk"><img src="LOGO_KDK.png" alt="KDK"></div>
       <h1>Dashboard Admin</h1>
-      <p>Kharisma Dwi Karya · Sistem Report</p>
+      <p>Kharisma Dwi Karya · Operating System</p>
       <div class="error-msg" id="adminErr">Password salah</div>
       <div class="field">
         <input type="password" id="adminPassword" placeholder="Password admin" onkeydown="if(event.key==='Enter') adminLogin()">
@@ -807,8 +825,12 @@ function goTo(pageId, direction) {
   window.scrollTo(0, 0);
   const appEl = document.querySelector(".app");
   appEl.classList.toggle("app-wide", pageId === "page-admin-dashboard");
-  const useBg = (pageId === "page-landing" || pageId === "page-login" || pageId === "page-admin-login");
+  const ADMIN_PAGES = ["page-admin-dashboard"];
+  const LANDING_PAGES = ["page-landing", "page-login", "page-admin-login"];
+  const useBg = !ADMIN_PAGES.includes(pageId);
+  const isProcessPage = useBg && !LANDING_PAGES.includes(pageId);
   appEl.classList.toggle("app-landing-mode", useBg);
+  appEl.classList.toggle("app-process-mode", isProcessPage);
   document.body.classList.toggle("landing-bg", useBg);
 }
 
