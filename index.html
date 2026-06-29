@@ -99,9 +99,17 @@
   @keyframes slideInFwd { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
   @keyframes slideInBack { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
 
-  .page#page-login.active { display: flex; align-items: center; padding: 0; }
+  .page#page-login.active { display: flex; align-items: center; padding: 24px 18px; min-height: 100vh; }
 
-  .login-card { width: 100%; padding: 40px 28px; position: relative; }
+  .login-card {
+    width: 100%; max-width: 400px; margin: 0 auto; position: relative;
+    padding: 36px 28px;
+    background: rgba(255,255,255,0.9);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.4);
+  }
   .login-mark { text-align: center; margin-bottom: 40px; }
   .login-mark .mk-big {
     width: 76px; height: 76px; border-radius: 20px; margin: 0 auto 18px;
@@ -446,7 +454,7 @@
       <div class="login-mark">
         <div class="mk-big">KDK</div>
         <h1>Kharisma Dwi Karya</h1>
-        <p>System Report Teknisi</p>
+        <p>Operating System</p>
       </div>
       <div class="error-msg" id="loginError"></div>
       <div class="field">
@@ -788,8 +796,9 @@ function goTo(pageId, direction) {
   window.scrollTo(0, 0);
   const appEl = document.querySelector(".app");
   appEl.classList.toggle("app-wide", pageId === "page-admin-dashboard");
-  appEl.classList.toggle("app-landing-mode", pageId === "page-landing");
-  document.body.classList.toggle("landing-bg", pageId === "page-landing");
+  const useBg = (pageId === "page-landing" || pageId === "page-login");
+  appEl.classList.toggle("app-landing-mode", useBg);
+  document.body.classList.toggle("landing-bg", useBg);
 }
 
 function stopStream(ctx) {
