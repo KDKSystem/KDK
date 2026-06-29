@@ -45,8 +45,8 @@
     max-width: 480px;
     margin: 0 auto;
     min-height: 100vh;
-    background: var(--surface);
     position: relative;
+    background: var(--surface);
     box-shadow: 0 0 60px rgba(11,17,32,0.08);
   }
 
@@ -71,21 +71,31 @@
   .topbar .user-chip { font-size: 11.5px; font-weight: 600; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; }
   .topbar .logout-btn { background: none; border: none; color: #fff; opacity: 0.55; font-size: 12px; font-weight: 600; padding: 6px; margin-left: 6px; }
 
-  .page {
-    display: none;
-    min-height: calc(100vh - 0px);
-    padding: 22px 20px 110px;
-  }
-  .page.active { display: block; }
+  /* FIX BUG #1 (lama): halaman login tetap kelihatan setelah pindah halaman.
+     FIX BUG #2 (baru): halaman tumpang-tindih / terlihat berantakan saat di-scroll.
+     Akar masalah: dulu .page punya berbagai override display per-id yang
+     tidak selalu bersyarat ke .active, dan tidak ada batas tegas antara
+     "halaman ini sedang tampil" vs "halaman ini sedang disembunyikan".
+     Aturan baru, SATU sumber kebenaran saja:
+       - .page TANPA .active  → display:none MUTLAK, tidak pernah memakan
+         ruang dokumen, tidak mungkin "bocor" kelihatan saat scroll.
+       - .page DENGAN .active → display:block (mengikuti flow dokumen
+         normal, tinggi ikut konten asli — penting untuk halaman panjang
+         seperti dashboard admin yang isinya tabel-tabel).
+     Tidak ada lagi pengecualian display:flex permanen untuk page tertentu;
+     kalau sebuah halaman butuh centering (login/landing/admin-login),
+     itu diatur lewat selector gabungan `#id.active` di bawah, supaya
+     status flex HANYA aktif bersamaan dengan status .active. */
+  .page { display: none; padding: 22px 20px 110px; }
+  .page.active { display: block; min-height: 100vh; }
   .page.enter-fwd { animation: slideInFwd 0.32s cubic-bezier(.2,.7,.3,1) both; }
   .page.enter-back { animation: slideInBack 0.32s cubic-bezier(.2,.7,.3,1) both; }
   @keyframes slideInFwd { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
   @keyframes slideInBack { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
 
-  #page-login.page { padding: 0; display: flex; align-items: center; min-height: 100vh; }
-  #page-login.page.active { display: flex; }
+  .page#page-login.active { display: flex; align-items: center; padding: 0; }
 
-  .login-card { width: 100%; padding: 40px 28px; }
+  .login-card { width: 100%; padding: 40px 28px; position: relative; }
   .login-mark { text-align: center; margin-bottom: 40px; }
   .login-mark .mk-big {
     width: 76px; height: 76px; border-radius: 20px; margin: 0 auto 18px;
@@ -146,6 +156,8 @@
   .lokasi-item .ic { width: 36px; height: 36px; border-radius: 10px; background: var(--blue-tint); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
   .lokasi-item .nm { font-weight: 700; font-size: 14px; }
   .lokasi-item .ad { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .lokasi-loading { text-align: center; padding: 30px 0; color: var(--muted); font-size: 13px; font-weight: 600; }
+  .lokasi-loading .gps-spinner { margin: 0 auto 12px; }
 
   .add-lokasi-link {
     text-align: center; padding: 15px; font-size: 13px; font-weight: 700; color: var(--blue);
@@ -196,10 +208,11 @@
   .preview-overlay img { max-width: 92%; max-height: 78vh; border-radius: 12px; object-fit: contain; }
   .preview-overlay .close-preview { margin-top: 22px; padding: 12px 28px; background: rgba(255,255,255,0.12); color: #fff; border: none; border-radius: 30px; font-size: 13px; font-weight: 700; }
 
-  .gps-card { padding: 14px 16px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 10px; font-family: var(--mono); }
+  .gps-card { padding: 14px 16px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 10px; font-family: var(--mono); flex-wrap: wrap; }
   .gps-card.loading { background: var(--amber-tint); color: #8a6418; }
   .gps-card.ok { background: var(--green-tint); color: var(--green-dark); }
   .gps-card.warn { background: var(--red-tint); color: var(--red-dark); }
+  .gps-card.warn button { margin-left: auto; flex-shrink: 0; background: var(--red); color: #fff; border: none; padding: 7px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: inherit; }
   .gps-spinner { width: 15px; height: 15px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -259,8 +272,124 @@
     width: 84px; height: 84px; border-radius: 50%; background: var(--green-tint); display: flex; align-items: center;
     justify-content: center; margin: 0 auto 22px; font-size: 38px; animation: popIn 0.4s cubic-bezier(.34,1.56,.64,1);
   }
+
+  .field-label-sm { font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; display:block; }
+
+  /* =============================================
+     LANDING PAGE — pintu masuk gabungan
+     Polos gradasi navy/biru (tanpa foto background).
+     CATATAN UKURAN kalau nanti mau pasang foto sendiri:
+       - Mobile  : minimal 750 x 1334px (rasio 9:16), JPG/WebP, <300KB
+       - Desktop : minimal 1920 x 1080px (rasio 16:9), JPG/WebP, <500KB
+       Pasang lewat CSS: #page-landing { background-image: url('nama-file.jpg'); }
+
+     PERBAIKAN PENTING: sebelumnya background gradasi dipasang lewat
+     elemen terpisah ".landing-bg" dengan position:fixed + z-index:-1,
+     diletakkan di DALAM ".app" yang punya background putih solid sendiri.
+     Ini membuat urutan render tidak konsisten di browser mobile —
+     kadang background putih ".app" muncul DI ATAS gradasi, membuat
+     kartu landing terlihat "kosong"/teks hilang, dan saat scroll
+     keduanya terlihat tumpang-tindih.
+     Sekarang gradasi dipasang LANGSUNG sebagai background milik
+     #page-landing itu sendiri — tidak ada lagi elemen terpisah,
+     tidak ada lagi z-index negatif, tidak ada lagi ambiguitas stacking. */
+  #page-landing.active {
+    display: flex; align-items: center; justify-content: center; padding: 24px 18px;
+    background: radial-gradient(circle at 18% 12%, rgba(37,99,235,0.35), transparent 45%),
+                linear-gradient(160deg, var(--ink) 0%, var(--ink-soft) 55%, #0d1730 100%);
+    background-size: cover; background-position: center;
+  }
+  .landing-card { width: 100%; max-width: 400px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 26px; padding: 34px 26px; backdrop-filter: blur(6px); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5); }
+  .landing-eyebrow { text-align: center; font-size: 11px; font-weight: 800; color: #93c5fd; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; }
+  .landing-title { text-align: center; font-size: 28px; font-weight: 800; color: #fff; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .landing-sub { text-align: center; font-size: 12.5px; color: rgba(255,255,255,0.55); margin-bottom: 28px; line-height: 1.5; }
+
+  .menu-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
+  .menu-card {
+    display: flex; align-items: center; gap: 14px; padding: 15px 16px; border-radius: 16px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
+    cursor: pointer; transition: transform 0.12s, background 0.15s; text-align: left;
+  }
+  .menu-card:active { transform: scale(0.97); }
+  .menu-card:hover { background: rgba(255,255,255,0.09); }
+  .menu-card .mc-ic { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 19px; flex-shrink: 0; }
+  .menu-card.mc-green .mc-ic { background: rgba(16,185,129,0.18); }
+  .menu-card.mc-blue .mc-ic { background: rgba(37,99,235,0.2); }
+  .menu-card .mc-body { flex: 1; min-width: 0; }
+  .menu-card .mc-title { font-size: 14px; font-weight: 700; color: #fff; }
+  .menu-card .mc-desc { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .menu-card .mc-arrow { color: rgba(255,255,255,0.35); font-size: 16px; flex-shrink: 0; }
+
+  .landing-footer { text-align: center; font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 26px; font-style: italic; line-height: 1.5; }
+
+  /* =============================================
+     ADMIN — embedded di file yang sama
+     ============================================= */
+  .page#page-admin-login.active { display: flex; align-items: center; justify-content: center; padding: 24px 18px; }
+  .admin-login-box { width: 100%; max-width: 360px; background: var(--surface); border-radius: var(--radius-lg); padding: 36px 30px; box-shadow: 0 20px 50px -15px rgba(11,17,32,0.18); }
+  .admin-login-box .mk { width: 60px; height: 60px; border-radius: 16px; background: linear-gradient(135deg, var(--ink), var(--blue-dark)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; margin: 0 auto 18px; }
+  .admin-login-box h1 { text-align: center; font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+  .admin-login-box p { text-align: center; font-size: 12.5px; color: var(--muted); margin-bottom: 24px; }
+
+  .page#page-admin-dashboard { padding: 0; }
+  .admin-topbar {
+    background: linear-gradient(135deg, var(--ink), var(--ink-soft)); color: #fff; padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50;
+  }
+  .admin-topbar .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 13px; }
+  .admin-topbar .brand .mk { width: 30px; height: 30px; border-radius: 8px; background: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 10.5px; }
+  .admin-topbar .logout { background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 7px 14px; border-radius: 20px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+
+  .admin-container { padding: 20px 16px 60px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); border-radius: var(--radius-md); padding: 14px; border: 1px solid var(--line); }
+  .stat-card .num { font-size: 22px; font-weight: 800; font-family: var(--mono); }
+  .stat-card .lbl { font-size: 10.5px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 4px; }
+  .stat-card.green .num { color: var(--green-dark); }
+  .stat-card.amber .num { color: #8a6418; }
+  .stat-card.red .num { color: var(--red-dark); }
+
+  .admin-panel { background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--line); margin-bottom: 16px; overflow: hidden; }
+  .admin-panel-head { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .admin-panel-head h2 { font-size: 14px; font-weight: 800; }
+
+  .admin-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .admin-filters select, .admin-filters input { padding: 7px 10px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 12px; font-family: inherit; background: var(--bg); }
+  .btn-export { background: var(--green); color: #fff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+
+  .admin-table-scroll { overflow-x: auto; max-height: 480px; overflow-y: auto; }
+  .admin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .admin-table th { text-align: left; padding: 9px 12px; background: var(--bg); color: var(--muted); font-weight: 700; text-transform: uppercase; font-size: 10px; letter-spacing: 0.4px; position: sticky; top: 0; white-space: nowrap; }
+  .admin-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .admin-table tr:hover td { background: var(--bg); }
+
+  .pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; white-space: nowrap; }
+  .pill.green { background: var(--green-tint); color: var(--green-dark); }
+  .pill.amber { background: var(--amber-tint); color: #8a6418; }
+  .pill.red { background: var(--red-tint); color: var(--red-dark); }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .mono-cell { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .link-maps { color: var(--blue); font-weight: 700; text-decoration: none; }
+  .photo-thumb { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; cursor: pointer; border: 1.5px solid var(--line); }
+  .empty-row { text-align: center; padding: 36px 16px; color: var(--muted); font-size: 12.5px; }
+  .loading-row { text-align: center; padding: 36px; color: var(--muted); font-size: 12.5px; }
+
+  /* Desktop: lebarkan dashboard admin keluar dari batas 480px ala mobile.
+     Pakai class ".app-wide" yang ditambah/dilepas lewat JS (goTo()),
+     bukan CSS :has() — supaya tetap jalan di browser lama/Safari versi lawas. */
+  .app.app-wide { max-width: 1100px; }
+  @media (min-width: 760px) {
+    .app.app-wide .admin-container { padding: 28px 32px 60px; }
+  }
+  /* Landing: lebarkan ".app" penuh layar (tanpa box/shadow ala mobile-card)
+     supaya gradasi navy mengisi seluruh viewport, termasuk di desktop. */
+  .app.app-landing-mode { max-width: 100%; box-shadow: none; }
 </style>
 </head>
+
 <body>
 <div class="app">
   <div class="topbar" id="topbar" style="display:none;">
@@ -274,9 +403,41 @@
     </div>
   </div>
 
-  <!-- ============ LOGIN ============ -->
-  <div class="page active" id="page-login">
+  <!-- ============ LANDING (pintu masuk gabungan) ============ -->
+  <div class="page active" id="page-landing">
+    <div class="landing-card">
+      <div class="landing-eyebrow">Sistem Absensi</div>
+      <div class="landing-title">KHARISMA<br>DWI KARYA</div>
+      <p class="landing-sub">Catat kehadiran teknisi, pantau lokasi servis,<br>dan kelola laporan secara real-time.</p>
+
+      <div class="menu-stack">
+        <div class="menu-card mc-green" onclick="goTo('page-login','fwd')">
+          <div class="mc-ic">🛠️</div>
+          <div class="mc-body">
+            <div class="mc-title">Absen Teknisi</div>
+            <div class="mc-desc">Absen datang, laporan servis, absen pulang</div>
+          </div>
+          <div class="mc-arrow">›</div>
+        </div>
+
+        <div class="menu-card mc-blue" onclick="goToAdminLogin()">
+          <div class="mc-ic">📊</div>
+          <div class="mc-body">
+            <div class="mc-title">Dashboard Admin</div>
+            <div class="mc-desc">Pantau aktivitas & rekap laporan</div>
+          </div>
+          <div class="mc-arrow">›</div>
+        </div>
+      </div>
+
+      <div class="landing-footer">"Kerja yang tercatat adalah kerja yang dihargai."<br>— KHARISMA DWI KARYA —</div>
+    </div>
+  </div>
+
+  <!-- ============ LOGIN TEKNISI ============ -->
+  <div class="page" id="page-login">
     <div class="login-card">
+      <button class="btn btn-ghost" style="width:auto; padding:0; margin-bottom:20px; font-weight:700; position:absolute; top:18px; left:18px;" onclick="goTo('page-landing','back')">← Kembali</button>
       <div class="login-mark">
         <div class="mk-big">KDK</div>
         <h1>Kharisma Dwi Karya</h1>
@@ -324,7 +485,9 @@
     <div class="search-box">
       <input type="text" id="searchLokasi" placeholder="Cari nama client..." oninput="renderLokasiList()">
     </div>
-    <div class="lokasi-list" id="lokasiList"></div>
+    <div class="lokasi-list" id="lokasiList">
+      <div class="lokasi-loading"><div class="gps-spinner" style="color:var(--blue); margin:0 auto 12px;"></div>Memuat daftar lokasi...</div>
+    </div>
     <div class="add-lokasi-link" onclick="showTambahLokasi()">+ Lokasi tidak ada di daftar? Tambah baru</div>
   </div>
 
@@ -342,7 +505,8 @@
       <label>Alamat</label>
       <textarea id="newAlamat" placeholder="Alamat lengkap"></textarea>
     </div>
-    <div class="gps-card loading" id="newLokasiGpsCard"><div class="gps-spinner"></div><span>Mengambil titik GPS kamu...</span></div>
+    <div class="gps-card loading" id="newLokasiGpsCard"><div class="gps-spinner"></div><span>Ketuk tombol di bawah untuk ambil titik GPS</span></div>
+    <button class="btn btn-outline" onclick="ambilGpsLokasiBaru()" id="btnAmbilGpsBaru" style="margin-bottom:12px;">📍 Ambil titik GPS sekarang</button>
     <button class="btn btn-success" onclick="simpanLokasiBaru()" id="btnSimpanLokasiBaru" disabled>Simpan & pilih lokasi ini</button>
   </div>
 
@@ -353,17 +517,19 @@
     <div class="section-title">Absen datang</div>
     <div class="section-sub">Selfie di lokasi <strong id="checkinLokasiNama" style="color:var(--ink);"></strong> untuk memverifikasi kehadiranmu</div>
 
-    <div class="gps-card loading" id="checkinGpsCard"><div class="gps-spinner"></div><span>Mengambil lokasi GPS...</span></div>
+    <div class="gps-card loading" id="checkinGpsCard"><div class="gps-spinner"></div><span>Ketuk tombol di bawah untuk ambil GPS</span></div>
+    <button class="btn btn-outline" onclick="ambilGpsCheckin()" id="btnAmbilGpsCheckin" style="margin-bottom:14px;">📍 Ambil titik GPS sekarang</button>
 
     <div class="camera-wrap" id="checkinCameraWrap">
-      <video id="checkinVideo" autoplay playsinline muted></video>
+      <video id="checkinVideo" autoplay playsinline muted style="display:none;"></video>
       <img class="captured" id="checkinImg" onclick="zoomPhoto('checkin')">
+      <div class="camera-placeholder" id="checkinPlaceholder" onclick="openCamera('checkin')"><div class="ic">🤳</div><span>Ketuk untuk buka kamera</span></div>
       <div class="camera-frame-corner cf-tl"></div><div class="camera-frame-corner cf-tr"></div>
       <div class="camera-frame-corner cf-bl"></div><div class="camera-frame-corner cf-br"></div>
       <div class="photo-success-badge" id="checkinBadge">✓</div>
       <div class="photo-zoom-hint" id="checkinZoomHint">⤢ Ketuk untuk perbesar</div>
     </div>
-    <div class="shutter-row" id="checkinShutterRow">
+    <div class="shutter-row" id="checkinShutterRow" style="display:none;">
       <button class="shutter-btn" onclick="capturePhoto('checkin')"></button>
     </div>
     <div class="retake-row" id="checkinRetakeRow" style="display:none;">
@@ -384,7 +550,7 @@
     <div class="section-title">Laporan servis</div>
     <div class="section-sub">Isi detail pekerjaan yang sudah dilakukan</div>
 
-    <label style="font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; display:block;">Foto hasil pekerjaan</label>
+    <label class="field-label-sm">1. Foto hasil pekerjaan</label>
     <div class="camera-wrap" id="hasilCameraWrap" style="aspect-ratio: 4/3; margin-bottom:10px;">
       <video id="hasilVideo" autoplay playsinline muted style="display:none;"></video>
       <img class="captured" id="hasilImg" onclick="zoomPhoto('hasil')">
@@ -396,37 +562,29 @@
     <div class="retake-row" id="hasilRetakeRow" style="display:none;"><button class="btn btn-outline" onclick="retakePhoto('hasil')">↺ Ambil ulang</button></div>
     <canvas id="hasilCanvas" style="display:none;"></canvas>
 
-    <label style="font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin: 18px 0 8px; display:block;">Foto nota / form servis</label>
-    <div class="camera-wrap" id="notaCameraWrap" style="aspect-ratio: 4/3; margin-bottom:10px;">
-      <video id="notaVideo" autoplay playsinline muted style="display:none;"></video>
-      <img class="captured" id="notaImg" onclick="zoomPhoto('nota')">
-      <div class="camera-placeholder" id="notaPlaceholder" onclick="openCamera('nota')"><div class="ic">🧾</div><span>Ketuk untuk ambil foto</span></div>
-      <div class="photo-success-badge" id="notaBadge">✓</div>
-      <div class="photo-zoom-hint" id="notaZoomHint">⤢ Ketuk untuk perbesar</div>
+    <label class="field-label-sm" style="margin-top:18px;">2. Foto Service Report</label>
+    <div class="camera-wrap" id="reportCameraWrap" style="aspect-ratio: 4/3; margin-bottom:10px;">
+      <video id="reportVideo" autoplay playsinline muted style="display:none;"></video>
+      <img class="captured" id="reportImg" onclick="zoomPhoto('report')">
+      <div class="camera-placeholder" id="reportPlaceholder" onclick="openCamera('report')"><div class="ic">🧾</div><span>Ketuk untuk ambil foto</span></div>
+      <div class="photo-success-badge" id="reportBadge">✓</div>
+      <div class="photo-zoom-hint" id="reportZoomHint">⤢ Ketuk untuk perbesar</div>
     </div>
-    <div class="shutter-row" id="notaShutterRow" style="display:none; margin-top:-14px; margin-bottom:10px;"><button class="shutter-btn" onclick="capturePhoto('nota')"></button></div>
-    <div class="retake-row" id="notaRetakeRow" style="display:none;"><button class="btn btn-outline" onclick="retakePhoto('nota')">↺ Ambil ulang</button></div>
-    <canvas id="notaCanvas" style="display:none;"></canvas>
+    <div class="shutter-row" id="reportShutterRow" style="display:none; margin-top:-14px; margin-bottom:10px;"><button class="shutter-btn" onclick="capturePhoto('report')"></button></div>
+    <div class="retake-row" id="reportRetakeRow" style="display:none;"><button class="btn btn-outline" onclick="retakePhoto('report')">↺ Ambil ulang</button></div>
+    <canvas id="reportCanvas" style="display:none;"></canvas>
 
     <div class="field" style="margin-top:18px;">
-      <label>Kerusakan</label>
-      <textarea id="lapKerusakan" placeholder="Jelaskan kerusakan yang ditemukan"></textarea>
+      <label>3. Kondisi mesin</label>
+      <textarea id="lapKondisiMesin" placeholder="Jelaskan kondisi mesin yang ditemukan/setelah servis"></textarea>
     </div>
     <div class="field">
-      <label>Perbaikan</label>
-      <textarea id="lapPerbaikan" placeholder="Jelaskan perbaikan yang dilakukan"></textarea>
+      <label>4. Suku cadang yang perlu diganti</label>
+      <textarea id="lapSparepart" placeholder="cth. Filter udara, sensor suhu (kosongkan jika tidak ada)"></textarea>
     </div>
     <div class="field">
-      <label>Sparepart digunakan</label>
-      <input type="text" id="lapSparepart" placeholder="cth. Kabel, sensor (kosongkan jika tidak ada)">
-    </div>
-    <div class="field">
-      <label>Biaya (Rp)</label>
-      <input type="number" id="lapBiaya" placeholder="0" inputmode="numeric">
-    </div>
-    <div class="field">
-      <label>Catatan tambahan</label>
-      <textarea id="lapCatatan" placeholder="Opsional"></textarea>
+      <label>5. Catatan</label>
+      <textarea id="lapCatatan" placeholder="Catatan tambahan (opsional)"></textarea>
     </div>
   </div>
 
@@ -441,17 +599,19 @@
     <div class="section-title">Absen pulang</div>
     <div class="section-sub">Selfie sekali lagi sebelum meninggalkan lokasi</div>
 
-    <div class="gps-card loading" id="checkoutGpsCard"><div class="gps-spinner"></div><span>Mengambil lokasi GPS...</span></div>
+    <div class="gps-card loading" id="checkoutGpsCard"><div class="gps-spinner"></div><span>Ketuk tombol di bawah untuk ambil GPS</span></div>
+    <button class="btn btn-outline" onclick="ambilGpsCheckout()" id="btnAmbilGpsCheckout" style="margin-bottom:14px;">📍 Ambil titik GPS sekarang</button>
 
     <div class="camera-wrap" id="checkoutCameraWrap">
-      <video id="checkoutVideo" autoplay playsinline muted></video>
+      <video id="checkoutVideo" autoplay playsinline muted style="display:none;"></video>
       <img class="captured" id="checkoutImg" onclick="zoomPhoto('checkout')">
+      <div class="camera-placeholder" id="checkoutPlaceholder" onclick="openCamera('checkout')"><div class="ic">🤳</div><span>Ketuk untuk buka kamera</span></div>
       <div class="camera-frame-corner cf-tl"></div><div class="camera-frame-corner cf-tr"></div>
       <div class="camera-frame-corner cf-bl"></div><div class="camera-frame-corner cf-br"></div>
       <div class="photo-success-badge" id="checkoutBadge">✓</div>
       <div class="photo-zoom-hint" id="checkoutZoomHint">⤢ Ketuk untuk perbesar</div>
     </div>
-    <div class="shutter-row" id="checkoutShutterRow">
+    <div class="shutter-row" id="checkoutShutterRow" style="display:none;">
       <button class="shutter-btn" onclick="capturePhoto('checkout')"></button>
     </div>
     <div class="retake-row" id="checkoutRetakeRow" style="display:none;">
@@ -474,6 +634,82 @@
     </div>
   </div>
 
+  <!-- ============ ADMIN LOGIN ============ -->
+  <div class="page" id="page-admin-login">
+    <div class="admin-login-box">
+      <button class="btn btn-ghost" style="width:auto; padding:0; margin-bottom:18px; font-weight:700;" onclick="goTo('page-landing','back')">← Kembali</button>
+      <div class="mk">KDK</div>
+      <h1>Dashboard Admin</h1>
+      <p>Kharisma Dwi Karya · Sistem Absensi</p>
+      <div class="error-msg" id="adminErr">Password salah</div>
+      <div class="field">
+        <input type="password" id="adminPassword" placeholder="Password admin" onkeydown="if(event.key==='Enter') adminLogin()">
+      </div>
+      <button class="btn btn-primary" onclick="adminLogin()">Masuk Dashboard</button>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN DASHBOARD ============ -->
+  <div class="page" id="page-admin-dashboard">
+    <div class="admin-topbar">
+      <div class="brand"><div class="mk">KDK</div> Dashboard Admin · KHARISMA DWI KARYA</div>
+      <button class="logout" onclick="adminLogout()">Keluar</button>
+    </div>
+
+    <div class="admin-container">
+      <div class="stat-grid" id="statGrid">
+        <div class="stat-card"><div class="num">-</div><div class="lbl">Absen hari ini</div></div>
+        <div class="stat-card green"><div class="num">-</div><div class="lbl">Selesai</div></div>
+        <div class="stat-card amber"><div class="num">-</div><div class="lbl">Sedang kerja</div></div>
+        <div class="stat-card red"><div class="num">-</div><div class="lbl">Di luar radius</div></div>
+      </div>
+
+      <div class="admin-panel">
+        <div class="admin-panel-head">
+          <h2>Aktivitas Absensi</h2>
+          <div class="admin-filters">
+            <input type="date" id="filterTanggal" onchange="renderAbsensiTable()">
+            <select id="filterTeknisi" onchange="renderAbsensiTable()"><option value="">Semua teknisi</option></select>
+            <button class="btn-export" onclick="exportCsv('absensi')">⬇ CSV</button>
+          </div>
+        </div>
+        <div class="admin-table-scroll">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Status</th><th>Teknisi</th><th>Client</th><th>Tanggal</th>
+                <th>Datang</th><th>Pulang</th><th>Jarak</th><th>Foto</th><th>Maps</th>
+              </tr>
+            </thead>
+            <tbody id="absensiBody">
+              <tr><td colspan="9"><div class="loading-row"><div class="spinner" style="width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div>Memuat data...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="admin-panel">
+        <div class="admin-panel-head">
+          <h2>Laporan Servis</h2>
+          <button class="btn-export" onclick="exportCsv('laporan')">⬇ CSV</button>
+        </div>
+        <div class="admin-table-scroll">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Tanggal</th><th>Teknisi</th><th>Client</th><th>Kondisi Mesin</th>
+                <th>Sparepart</th><th>Catatan</th><th>Foto Hasil</th><th>Foto Report</th>
+              </tr>
+            </thead>
+            <tbody id="laporanBody">
+              <tr><td colspan="8"><div class="loading-row"><div class="spinner" style="width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div>Memuat data...</div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div class="preview-overlay" id="previewOverlay">
@@ -488,14 +724,8 @@
 </div>
 
 <script>
-// =============================================
-// KONFIGURASI
-// =============================================
 const API_URL = "https://script.google.com/macros/s/AKfycbwOfjWnLaHMCsMx7IpGGMylcBYBL7KYp5FbL6NyAPCRSb1Z29rAN_l-RuMu9GoSbJ5n/exec";
 
-// =============================================
-// STATE
-// =============================================
 let currentUser = null;
 let lokasiData = [];
 let selectedLokasi = null;
@@ -504,11 +734,8 @@ let currentGps = null;
 let newLokasiGps = null;
 let streams = {};
 let capturedPhotos = {};
-let activePage = "page-login";
+let activePage = "page-landing";
 
-// =============================================
-// API
-// =============================================
 async function apiCall(payload) {
   const res = await fetch(API_URL, {
     method: "POST",
@@ -532,9 +759,6 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove("show"), 2800);
 }
 
-// =============================================
-// NAVIGASI ANTAR HALAMAN (transisi slide)
-// =============================================
 function goTo(pageId, direction) {
   const current = document.getElementById(activePage);
   const next = document.getElementById(pageId);
@@ -543,6 +767,11 @@ function goTo(pageId, direction) {
   document.querySelectorAll(".bottom-bar").forEach(b => b.style.display = "none");
   activePage = pageId;
   window.scrollTo(0, 0);
+
+  // sesuaikan lebar/gaya kontainer ".app" tergantung jenis halaman
+  const appEl = document.querySelector(".app");
+  appEl.classList.toggle("app-wide", pageId === "page-admin-dashboard");
+  appEl.classList.toggle("app-landing-mode", pageId === "page-landing");
 }
 
 function zoomPhoto(ctx) {
@@ -553,9 +782,6 @@ function zoomPhoto(ctx) {
 }
 function closePreview() { document.getElementById("previewOverlay").classList.remove("show"); }
 
-// =============================================
-// LOGIN
-// =============================================
 async function doLogin() {
   const username = document.getElementById("loginUsername").value.trim();
   const password = document.getElementById("loginPassword").value.trim();
@@ -579,9 +805,9 @@ async function doLogin() {
       document.getElementById("topbar").style.display = "flex";
       document.getElementById("userChip").textContent = res.nama;
       document.getElementById("homeNama").textContent = res.nama;
-      await loadLokasiData();
-      await refreshHomeStatus();
       goTo("page-home", "fwd");
+      loadLokasiData();
+      refreshHomeStatus();
     } else {
       errBox.textContent = res.message || "Login gagal.";
       errBox.classList.add("show");
@@ -600,12 +826,9 @@ function logout() {
   document.getElementById("topbar").style.display = "none";
   document.getElementById("loginUsername").value = "";
   document.getElementById("loginPassword").value = "";
-  goTo("page-login", "back");
+  goTo("page-landing", "back");
 }
 
-// =============================================
-// HOME
-// =============================================
 async function refreshHomeStatus() {
   try {
     const res = await apiCall({ action: "getAbsensiHariIni", id_teknisi: currentUser.id_teknisi });
@@ -657,21 +880,29 @@ function goHome() {
   goTo("page-home", "back");
 }
 
-// =============================================
-// LOKASI
-// =============================================
 async function loadLokasiData() {
   try {
     const res = await apiCall({ action: "getLokasi" });
-    if (res.success) lokasiData = res.data;
+    lokasiData = res.success ? res.data : [];
   } catch (e) {
-    showToast("Gagal memuat daftar lokasi");
+    lokasiData = [];
   }
+  if (activePage === "page-lokasi") renderLokasiList();
 }
 
 function renderLokasiList() {
-  const q = document.getElementById("searchLokasi").value.toLowerCase().trim();
   const container = document.getElementById("lokasiList");
+
+  if (lokasiData.length === 0) {
+    container.innerHTML = `
+      <div class="lokasi-loading">
+        <p style="margin-bottom:12px;">Daftar lokasi belum termuat / gagal memuat.</p>
+        <button class="btn btn-outline" style="width:auto; padding:10px 20px; display:inline-flex;" onclick="loadLokasiData()">↻ Coba lagi</button>
+      </div>`;
+    return;
+  }
+
+  const q = document.getElementById("searchLokasi").value.toLowerCase().trim();
   const filtered = lokasiData.filter(l => l.nama_client.toLowerCase().includes(q) || (l.alamat || "").toLowerCase().includes(q));
 
   if (filtered.length === 0) {
@@ -702,8 +933,20 @@ function showTambahLokasi() {
   newLokasiGps = null;
   const card = document.getElementById("newLokasiGpsCard");
   card.className = "gps-card loading";
-  card.innerHTML = '<div class="gps-spinner"></div><span>Mengambil titik GPS kamu...</span>';
+  card.innerHTML = '<div class="gps-spinner"></div><span>Ketuk tombol di bawah untuk ambil titik GPS</span>';
   document.getElementById("btnSimpanLokasiBaru").disabled = true;
+}
+
+function ambilGpsLokasiBaru() {
+  const card = document.getElementById("newLokasiGpsCard");
+  card.className = "gps-card loading";
+  card.innerHTML = '<div class="gps-spinner"></div><span>Mengambil lokasi GPS...</span>';
+
+  if (!navigator.geolocation) {
+    card.className = "gps-card warn";
+    card.innerHTML = '<span>⚠️ Browser ini tidak mendukung GPS.</span>';
+    return;
+  }
 
   navigator.geolocation.getCurrentPosition(
     pos => {
@@ -714,17 +957,24 @@ function showTambahLokasi() {
     },
     err => {
       card.className = "gps-card warn";
-      card.innerHTML = `<span>⚠️ Gagal ambil GPS. Aktifkan izin lokasi di browser, lalu coba lagi.</span>`;
+      card.innerHTML = `<span>⚠️ ${gpsErrorMessage(err)}</span><button onclick="ambilGpsLokasiBaru()">Coba lagi</button>`;
     },
-    { enableHighAccuracy: true, timeout: 15000 }
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
   );
+}
+
+function gpsErrorMessage(err) {
+  if (err.code === 1) return "Izin lokasi ditolak. Buka pengaturan Safari/Chrome → izinkan lokasi untuk situs ini.";
+  if (err.code === 2) return "Lokasi tidak tersedia. Pastikan GPS HP aktif.";
+  if (err.code === 3) return "Waktu habis mengambil lokasi. Coba lagi di area sinyal lebih baik.";
+  return "Gagal mengambil lokasi GPS.";
 }
 
 async function simpanLokasiBaru() {
   const nama = document.getElementById("newNamaClient").value.trim();
   const alamat = document.getElementById("newAlamat").value.trim();
   if (!nama) { showToast("Nama client wajib diisi"); return; }
-  if (!newLokasiGps) { showToast("GPS belum siap"); return; }
+  if (!newLokasiGps) { showToast("Ambil titik GPS dulu sebelum menyimpan"); return; }
 
   showLoading("Menyimpan lokasi baru...");
   try {
@@ -746,26 +996,20 @@ async function simpanLokasiBaru() {
   }
 }
 
-// =============================================
-// KAMERA
-// =============================================
 async function openCamera(ctx) {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: ctx === "checkin" || ctx === "checkout" ? "user" : "environment" },
+      video: { facingMode: (ctx === "checkin" || ctx === "checkout") ? "user" : "environment" },
       audio: false
     });
     streams[ctx] = stream;
     const video = document.getElementById(ctx + "Video");
     video.srcObject = stream;
     video.style.display = "block";
-
-    if (ctx === "hasil" || ctx === "nota") {
-      document.getElementById(ctx + "Placeholder").style.display = "none";
-      document.getElementById(ctx + "ShutterRow").style.display = "flex";
-    }
+    document.getElementById(ctx + "Placeholder").style.display = "none";
+    document.getElementById(ctx + "ShutterRow").style.display = "flex";
   } catch (e) {
-    showToast("Tidak bisa akses kamera. Periksa izin kamera di browser.");
+    showToast("Tidak bisa akses kamera. Periksa izin kamera di pengaturan browser.");
   }
 }
 
@@ -801,20 +1045,12 @@ function retakePhoto(ctx) {
   document.getElementById(ctx + "Badge").style.display = "none";
   document.getElementById(ctx + "ZoomHint").style.display = "none";
   document.getElementById(ctx + "RetakeRow").style.display = "none";
+  document.getElementById(ctx + "Placeholder").style.display = "flex";
 
-  if (ctx === "hasil" || ctx === "nota") {
-    document.getElementById(ctx + "Placeholder").style.display = "flex";
-  } else {
-    openCamera(ctx);
-    document.getElementById(ctx + "ShutterRow").style.display = "flex";
-  }
   if (ctx === "checkin") updateCheckinButtonState();
   if (ctx === "checkout") updateCheckoutButtonState();
 }
 
-// =============================================
-// CHECK IN
-// =============================================
 function goToCheckin() {
   goTo("page-checkin", "fwd");
   document.getElementById("bar-checkin").style.display = "flex";
@@ -824,11 +1060,24 @@ function goToCheckin() {
   document.getElementById("checkinZoomHint").style.display = "none";
   document.getElementById("checkinImg").style.display = "none";
   document.getElementById("checkinRetakeRow").style.display = "none";
+  document.getElementById("checkinPlaceholder").style.display = "flex";
   updateCheckinButtonState();
 
   const card = document.getElementById("checkinGpsCard");
   card.className = "gps-card loading";
+  card.innerHTML = '<div class="gps-spinner"></div><span>Ketuk tombol di bawah untuk ambil GPS</span>';
+}
+
+function ambilGpsCheckin() {
+  const card = document.getElementById("checkinGpsCard");
+  card.className = "gps-card loading";
   card.innerHTML = '<div class="gps-spinner"></div><span>Mengambil lokasi GPS...</span>';
+
+  if (!navigator.geolocation) {
+    card.className = "gps-card warn";
+    card.innerHTML = '<span>⚠️ Browser ini tidak mendukung GPS.</span>';
+    return;
+  }
 
   navigator.geolocation.getCurrentPosition(
     pos => {
@@ -839,12 +1088,10 @@ function goToCheckin() {
     },
     err => {
       card.className = "gps-card warn";
-      card.innerHTML = `<span>⚠️ Gagal ambil GPS. Aktifkan izin lokasi, lalu refresh halaman.</span>`;
+      card.innerHTML = `<span>⚠️ ${gpsErrorMessage(err)}</span><button onclick="ambilGpsCheckin()">Coba lagi</button>`;
     },
-    { enableHighAccuracy: true, timeout: 15000 }
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
   );
-
-  openCamera("checkin");
 }
 
 function updateCheckinButtonState() {
@@ -877,9 +1124,6 @@ async function submitCheckIn() {
   }
 }
 
-// =============================================
-// LAPORAN
-// =============================================
 function lanjutKeLaporan() {
   goTo("page-laporan", "fwd");
   document.getElementById("bar-laporan").style.display = "flex";
@@ -887,7 +1131,7 @@ function lanjutKeLaporan() {
 }
 
 function resetLaporanForm() {
-  ["hasil", "nota"].forEach(ctx => {
+  ["hasil", "report"].forEach(ctx => {
     capturedPhotos[ctx] = null;
     document.getElementById(ctx + "Img").style.display = "none";
     document.getElementById(ctx + "Badge").style.display = "none";
@@ -896,40 +1140,33 @@ function resetLaporanForm() {
     document.getElementById(ctx + "ShutterRow").style.display = "none";
     document.getElementById(ctx + "RetakeRow").style.display = "none";
   });
-  document.getElementById("lapKerusakan").value = "";
-  document.getElementById("lapPerbaikan").value = "";
+  document.getElementById("lapKondisiMesin").value = "";
   document.getElementById("lapSparepart").value = "";
-  document.getElementById("lapBiaya").value = "";
   document.getElementById("lapCatatan").value = "";
 }
 
 async function submitLaporan() {
   if (!currentAbsensiId) { showToast("Sesi absen tidak ditemukan, ulangi dari absen datang."); return; }
 
-  const kerusakan = document.getElementById("lapKerusakan").value.trim();
-  const perbaikan = document.getElementById("lapPerbaikan").value.trim();
+  const kondisiMesin = document.getElementById("lapKondisiMesin").value.trim();
 
-  if (!kerusakan || !perbaikan) { showToast("Kerusakan dan perbaikan wajib diisi"); return; }
+  if (!kondisiMesin) { showToast("Kondisi mesin wajib diisi"); return; }
   if (!capturedPhotos["hasil"]) { showToast("Foto hasil pekerjaan wajib diambil"); return; }
+  if (!capturedPhotos["report"]) { showToast("Foto Service Report wajib diambil"); return; }
 
   showLoading("Menyimpan laporan...");
   try {
     const res = await apiCall({
-      action: "simpanLaporan", id_absensi: currentAbsensiId, nama_teknisi: currentUser.nama,
-      nama_client: selectedLokasi.nama_client, kerusakan, perbaikan,
+      action: "simpanLaporan",
+      id_absensi: currentAbsensiId,
+      nama_teknisi: currentUser.nama,
+      nama_client: selectedLokasi.nama_client,
+      foto_hasil_base64: capturedPhotos["hasil"],
+      foto_report_base64: capturedPhotos["report"],
+      kondisi_mesin: kondisiMesin,
       sparepart: document.getElementById("lapSparepart").value.trim(),
-      biaya: document.getElementById("lapBiaya").value || 0,
-      catatan: document.getElementById("lapCatatan").value.trim(),
-      foto_base64: capturedPhotos["hasil"]
+      catatan: document.getElementById("lapCatatan").value.trim()
     });
-
-    if (capturedPhotos["nota"]) {
-      await apiCall({
-        action: "simpanLaporan", id_absensi: currentAbsensiId, nama_teknisi: currentUser.nama,
-        nama_client: selectedLokasi.nama_client, kerusakan: "[FOTO NOTA/FORM SERVIS]", perbaikan: "-",
-        sparepart: "-", biaya: 0, catatan: "Lampiran foto nota servis", foto_base64: capturedPhotos["nota"]
-      });
-    }
 
     if (res.success) {
       showToast("Laporan tersimpan!");
@@ -946,9 +1183,6 @@ async function submitLaporan() {
   }
 }
 
-// =============================================
-// CHECK OUT
-// =============================================
 function mulaiAbsenPulang() {
   goTo("page-checkout", "fwd");
   document.getElementById("bar-checkout").style.display = "flex";
@@ -962,11 +1196,24 @@ function goToCheckoutPrep() {
   document.getElementById("checkoutZoomHint").style.display = "none";
   document.getElementById("checkoutImg").style.display = "none";
   document.getElementById("checkoutRetakeRow").style.display = "none";
+  document.getElementById("checkoutPlaceholder").style.display = "flex";
   updateCheckoutButtonState();
 
   const card = document.getElementById("checkoutGpsCard");
   card.className = "gps-card loading";
+  card.innerHTML = '<div class="gps-spinner"></div><span>Ketuk tombol di bawah untuk ambil GPS</span>';
+}
+
+function ambilGpsCheckout() {
+  const card = document.getElementById("checkoutGpsCard");
+  card.className = "gps-card loading";
   card.innerHTML = '<div class="gps-spinner"></div><span>Mengambil lokasi GPS...</span>';
+
+  if (!navigator.geolocation) {
+    card.className = "gps-card warn";
+    card.innerHTML = '<span>⚠️ Browser ini tidak mendukung GPS.</span>';
+    return;
+  }
 
   navigator.geolocation.getCurrentPosition(
     pos => {
@@ -977,12 +1224,10 @@ function goToCheckoutPrep() {
     },
     err => {
       card.className = "gps-card warn";
-      card.innerHTML = `<span>⚠️ Gagal ambil GPS. Aktifkan izin lokasi, lalu refresh halaman.</span>`;
+      card.innerHTML = `<span>⚠️ ${gpsErrorMessage(err)}</span><button onclick="ambilGpsCheckout()">Coba lagi</button>`;
     },
-    { enableHighAccuracy: true, timeout: 15000 }
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
   );
-
-  openCamera("checkout");
 }
 
 function updateCheckoutButtonState() {
@@ -1009,7 +1254,179 @@ async function submitCheckOut() {
     hideLoading();
   }
 }
+
+// =============================================
+// ADMIN — embedded di file yang sama (landing → page-admin-login → page-admin-dashboard)
+// =============================================
+let dashAbsensi = [];
+let dashLaporan = [];
+let dashTeknisi = [];
+let isAdminLoggedIn = false;
+
+function goToAdminLogin() {
+  document.getElementById("adminPassword").value = "";
+  document.getElementById("adminErr").classList.remove("show");
+  goTo("page-admin-login", "fwd");
+}
+
+async function adminLogin() {
+  const password = document.getElementById("adminPassword").value;
+  const err = document.getElementById("adminErr");
+  err.classList.remove("show");
+
+  try {
+    const res = await apiCall({ action: "adminLogin", password });
+    if (res.success) {
+      isAdminLoggedIn = true;
+      goTo("page-admin-dashboard", "fwd");
+      loadAdminDashboard();
+    } else {
+      err.textContent = res.message || "Password salah";
+      err.classList.add("show");
+    }
+  } catch (e) {
+    err.textContent = "Gagal terhubung ke server.";
+    err.classList.add("show");
+  }
+}
+
+function adminLogout() {
+  isAdminLoggedIn = false;
+  goTo("page-landing", "back");
+}
+
+async function loadAdminDashboard() {
+  try {
+    const res = await apiCall({ action: "getDashboardAdmin" });
+    if (!res.success) return;
+    dashAbsensi = res.absensi.reverse(); // terbaru di atas
+    dashLaporan = res.laporan.reverse();
+    dashTeknisi = res.teknisi;
+
+    const teknisiSelect = document.getElementById("filterTeknisi");
+    teknisiSelect.innerHTML = '<option value="">Semua teknisi</option>';
+    dashTeknisi.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t.nama;
+      opt.textContent = t.nama;
+      teknisiSelect.appendChild(opt);
+    });
+
+    renderAdminStats();
+    renderAbsensiTable();
+    renderLaporanTable();
+  } catch (e) {
+    document.getElementById("absensiBody").innerHTML = '<tr><td colspan="9" class="empty-row">Gagal memuat data. Cek koneksi atau refresh halaman.</td></tr>';
+  }
+}
+
+function renderAdminStats() {
+  const today = new Date();
+  const todayStr = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,"0") + "-" + String(today.getDate()).padStart(2,"0");
+  const todayData = dashAbsensi.filter(a => a.tanggal === todayStr);
+
+  const selesai = todayData.filter(a => a.jam_checkout).length;
+  const sedangKerja = todayData.filter(a => !a.jam_checkout).length;
+  const diLuarRadius = todayData.filter(a => a.status === "DI LUAR RADIUS").length;
+
+  const grid = document.getElementById("statGrid");
+  grid.innerHTML = `
+    <div class="stat-card"><div class="num">${todayData.length}</div><div class="lbl">Absen hari ini</div></div>
+    <div class="stat-card green"><div class="num">${selesai}</div><div class="lbl">Selesai</div></div>
+    <div class="stat-card amber"><div class="num">${sedangKerja}</div><div class="lbl">Sedang kerja</div></div>
+    <div class="stat-card red"><div class="num">${diLuarRadius}</div><div class="lbl">Di luar radius</div></div>
+  `;
+}
+
+function statusPillAdmin(item) {
+  if (!item.jam_checkout) return '<span class="pill amber"><span class="dot"></span>Sedang kerja</span>';
+  if (item.status === "DI LUAR RADIUS") return '<span class="pill red"><span class="dot"></span>Selesai · Di luar radius</span>';
+  return '<span class="pill green"><span class="dot"></span>Selesai</span>';
+}
+
+function photoThumbAdmin(url) {
+  if (!url || url.startsWith("ERROR_UPLOAD")) return '<span style="color:var(--muted); font-size:11px;">—</span>';
+  return `<img class="photo-thumb" src="${url}" onclick="zoomPhoto2('${url}')" loading="lazy">`;
+}
+
+// reuse modal foto yang sama dengan halaman teknisi, tapi terima URL langsung (bukan base64 lokal)
+function zoomPhoto2(url) {
+  document.getElementById("previewImg").src = url;
+  document.getElementById("previewOverlay").classList.add("show");
+}
+
+function renderAbsensiTable() {
+  const tanggalFilter = document.getElementById("filterTanggal").value;
+  const teknisiFilter = document.getElementById("filterTeknisi").value;
+
+  let filtered = dashAbsensi;
+  if (tanggalFilter) filtered = filtered.filter(a => a.tanggal === tanggalFilter);
+  if (teknisiFilter) filtered = filtered.filter(a => a.nama_teknisi === teknisiFilter);
+
+  const tbody = document.getElementById("absensiBody");
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-row">Tidak ada data untuk filter ini.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(a => `
+    <tr>
+      <td>${statusPillAdmin(a)}</td>
+      <td><strong>${a.nama_teknisi}</strong></td>
+      <td>${a.nama_client}</td>
+      <td class="mono-cell">${a.tanggal}</td>
+      <td class="mono-cell">${a.jam_checkin || "-"}</td>
+      <td class="mono-cell">${a.jam_checkout || "-"}</td>
+      <td class="mono-cell">${a.jarak_meter !== "" && a.jarak_meter != null ? a.jarak_meter + "m" : "-"}</td>
+      <td>${photoThumbAdmin(a.foto_checkin)} ${a.foto_checkout ? photoThumbAdmin(a.foto_checkout) : ""}</td>
+      <td>${a.lat_checkin ? `<a class="link-maps" target="_blank" href="https://www.google.com/maps?q=${a.lat_checkin},${a.lng_checkin}">Lihat ↗</a>` : "-"}</td>
+    </tr>
+  `).join("");
+}
+
+function renderLaporanTable() {
+  const tbody = document.getElementById("laporanBody");
+  if (dashLaporan.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-row">Belum ada laporan servis.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = dashLaporan.map(l => `
+    <tr>
+      <td class="mono-cell">${l.tanggal}</td>
+      <td><strong>${l.nama_teknisi}</strong></td>
+      <td>${l.nama_client}</td>
+      <td style="max-width:220px;">${l.kondisi_mesin || "-"}</td>
+      <td style="max-width:160px;">${l.sparepart || "-"}</td>
+      <td style="max-width:160px;">${l.catatan || "-"}</td>
+      <td>${photoThumbAdmin(l.foto_hasil)}</td>
+      <td>${photoThumbAdmin(l.foto_report)}</td>
+    </tr>
+  `).join("");
+}
+
+function exportCsv(type) {
+  let rows, headers, filename;
+
+  if (type === "absensi") {
+    headers = ["Tanggal","Teknisi","Client","Jam Datang","Jam Pulang","Status","Jarak (m)","Lat Checkin","Lng Checkin"];
+    rows = dashAbsensi.map(a => [a.tanggal, a.nama_teknisi, a.nama_client, a.jam_checkin, a.jam_checkout, a.status, a.jarak_meter, a.lat_checkin, a.lng_checkin]);
+    filename = "rekap_absensi_kdwk.csv";
+  } else {
+    headers = ["Tanggal","Teknisi","Client","Kondisi Mesin","Sparepart Diganti","Catatan"];
+    rows = dashLaporan.map(l => [l.tanggal, l.nama_teknisi, l.nama_client, l.kondisi_mesin, l.sparepart, l.catatan]);
+    filename = "rekap_laporan_kdwk.csv";
+  }
+
+  const csvContent = [headers.join(","), ...rows.map(r => r.map(cell => `"${String(cell || "").replace(/"/g, '""')}"`).join(","))].join("\n");
+  const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 </script>
-</div>
 </body>
 </html>
