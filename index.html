@@ -308,30 +308,31 @@
 
   /* LANDING */
   #page-landing.active {
-    display: flex; align-items: flex-end; justify-content: center; padding: 24px 18px 48px;
+    display: flex; align-items: flex-end; justify-content: center; padding: 24px 18px 52px;
     background: transparent; min-height: 100vh;
   }
-  /* Desktop: lebih ke bawah-tengah */
+  /* Desktop: card ke kiri-tengah agak bawah */
   @media (min-width: 760px) {
     #page-landing.active {
+      justify-content: flex-start;
+      padding-left: calc(50% - 340px);
+      padding-bottom: 72px;
       align-items: flex-end;
-      justify-content: center;
-      padding-bottom: 60px;
     }
   }
   .landing-card {
-    width: 100%; max-width: 400px;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.12);
+    width: 100%; max-width: 360px;
+    background: rgba(255,255,255,0.22);
+    border: 1px solid rgba(255,255,255,0.30);
     border-radius: 26px; padding: 30px 26px;
-    backdrop-filter: blur(14px) saturate(140%) brightness(0.85);
-    -webkit-backdrop-filter: blur(14px) saturate(140%) brightness(0.85);
-    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.55);
+    backdrop-filter: blur(20px) saturate(160%) brightness(0.95);
+    -webkit-backdrop-filter: blur(20px) saturate(160%) brightness(0.95);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.12) inset;
     transition: background 0.25s, border-color 0.25s;
   }
   .landing-card:hover {
-    background: rgba(255,255,255,0.10);
-    border-color: rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.28);
+    border-color: rgba(255,255,255,0.38);
   }
 
   .menu-stack { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
@@ -425,16 +426,13 @@
     .app.app-wide .admin-container { padding: 28px 32px 60px; }
   }
   .app.app-landing-mode { max-width: 100%; box-shadow: none; background: transparent; }
-
-  /* Halaman proses teknisi (home, lokasi, checkin, laporan, checkout, selesai):
-     .app pakai frosted glass ringan supaya konten tetap terbaca di atas background foto */
+  /* Halaman proses teknisi: frosted glass ringan supaya form tetap terbaca */
   .app.app-process-mode {
-    background: rgba(255,255,255,0.82) !important;
+    background: rgba(255,255,255,0.84) !important;
     backdrop-filter: blur(24px) saturate(1.4);
     -webkit-backdrop-filter: blur(24px) saturate(1.4);
     box-shadow: 0 0 0 1px rgba(255,255,255,0.25), 0 8px 48px rgba(0,0,0,0.18);
   }
-
 </style>
 </head>
 
