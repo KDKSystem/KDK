@@ -311,19 +311,9 @@
     display: flex; align-items: center; justify-content: center;
     padding: 24px 18px; background: transparent; min-height: 100vh;
   }
-  @media (min-width: 760px) {
-    #page-landing.active {
-      justify-content: flex-start;
-      padding-left: 152px;
-      align-items: center;
-    }
-    .landing-card {
-      margin-top: 214px; /* 2cm + 3cm tambahan ke bawah dari center */
-    }
-  }
   .landing-card {
     width: 100%; max-width: 360px;
-    margin-top: -113px; /* naik 3cm di versi mobile */
+    margin-top: -189px; /* naik 3cm + 2cm di versi mobile */
     background: rgba(15, 20, 35, 0.58);
     border: 1px solid rgba(255,255,255,0.20);
     border-radius: 26px; padding: 30px 26px;
@@ -331,6 +321,16 @@
     -webkit-backdrop-filter: blur(24px) saturate(160%);
     box-shadow: 0 24px 60px -12px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset;
     transition: background 0.25s, border-color 0.25s, transform 0.2s;
+  }
+  @media (min-width: 760px) {
+    #page-landing.active {
+      justify-content: flex-start;
+      padding-left: 152px;
+      align-items: center;
+    }
+    .landing-card {
+      margin-top: 214px !important; /* 2cm + 3cm tambahan ke bawah dari center - desktop */
+    }
   }
   .landing-card:hover {
     background: rgba(15, 20, 35, 0.68);
